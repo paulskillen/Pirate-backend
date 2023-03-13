@@ -1,0 +1,39 @@
+{
+  "auth": {
+    "password": {
+      "invalid": "Password Invalid"
+    },
+    "user": {
+      "invalid": "Username Invalid"
+    },
+    "account": {
+      "invalid": "Admin Invalid",
+      "blocked": "Oh no!!! Your account has been blocked."
+    },
+    "token": {
+      "invalid": "Token Invalid"
+    },
+    "role": {
+      "invalid": "Role Invalid"
+    }
+  },
+  "shipping": {
+    "create" : {
+      "permission" : "[Create Shipping] Permission denied"
+    },
+    "update" : {
+      "permission" : "[Update Shipping] Permission denied"
+    },
+    "delete" : {
+      "permission" : "[Delete Shipping] Permission denied"
+    }
+  },
+  "payment": {
+    "update" : {
+      "permission" : "[Update Payment] Permission denied"
+    },
+    "price" : {
+      "invalid" : "Price Payment Invalid"
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "equipmentBranchIsNotMatched": "Id: @equipmentId Equipment's branch is not matched with transfer origin !",
+  "transferIsNotValidToCreateDelivery": "This transfer is not valid to create delivery ! !",
+  "equipmentIsNotInTransfer": "Id: @equipmentId is not found in current Equipment Transfer Document !",
+  "equipmentIsCurrentlyOnHold": "Id: @equipmentId is currently on-hold and can not be transferred!"
+}

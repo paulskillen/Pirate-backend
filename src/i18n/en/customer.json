@@ -1,0 +1,18 @@
+{
+  "shipping": {
+    "create": {
+      "permission": "[Create Shipping] Permission denied"
+    },
+    "update": {
+      "permission": "[Update Shipping] Permission denied"
+    },
+    "delete": {
+      "permission": "[Delete Shipping] Permission denied"
+    }
+  },
+  "quotation": {
+    "update": {
+      "permission": "[Update Quotation] Permission denied"
+    }
+  }
+}
