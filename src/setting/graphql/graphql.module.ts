@@ -18,7 +18,7 @@ export class GraphQlModule {
       driver: ApolloDriver,
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+        autoSchemaFile: true,
         debug: configService.get('ENV') == 'production' ? false : true,
         playground: configService.get('ENV') == 'production' ? false : true,
         validationRules: [
@@ -33,7 +33,7 @@ export class GraphQlModule {
           Object.assign(ctx, { loaders: appCacheModule() });
           return ctx;
         },
-        path: '../',
+        path: '/graphql',
       }),
       inject: [ConfigService],
     });
