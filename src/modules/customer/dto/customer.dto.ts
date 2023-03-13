@@ -5,90 +5,6 @@ import { PaginateResponse } from 'src/common/paginate/dto/paginate.dto';
 import { CustomerTitle, Gender } from '../customer.constant';
 
 @ObjectType()
-export class FamilyInformationDto {
-  @Field()
-  name?: string;
-
-  @Field({ nullable: true })
-  relationship?: string;
-
-  @Field(() => JSON, { nullable: true })
-  dateOfBirth?: Date;
-
-  @Field()
-  phone?: string;
-}
-
-@ObjectType()
-export class EmergencyContactDto {
-  @Field()
-  name?: string;
-
-  @Field({ nullable: true })
-  relationship?: string;
-
-  @Field({ nullable: true })
-  residence?: string;
-
-  @Field()
-  phone?: string;
-}
-
-@ObjectType()
-export class SurgeryHistoryDto {
-  @Field(() => JSON, { nullable: true })
-  date?: Date;
-
-  @Field()
-  surgery?: string;
-
-  @Field()
-  hospital?: string;
-}
-
-@ObjectType()
-export class MedicalProfileDto {
-  @Field({ nullable: true })
-  height?: number;
-
-  @Field({ nullable: true })
-  weight?: number;
-
-  @Field({ nullable: true })
-  bloodGroup?: string;
-
-  @Field({ nullable: true })
-  bloodPressure?: string;
-
-  @Field({ nullable: true })
-  allergyHis?: string;
-
-  @Field({ nullable: true })
-  underDisease?: string;
-
-  @Field(() => [SurgeryHistoryDto], { nullable: true, defaultValue: [] })
-  surgeryHis?: SurgeryHistoryDto[];
-}
-
-@ObjectType()
-export class SurveyAnswersRequestDto {
-  @Field()
-  questionId: string;
-
-  @Field(() => [String])
-  answers?: string[];
-}
-
-@ObjectType()
-export class CustomerSurveyDto {
-  @Field(() => JSON)
-  updatedAt: Date;
-
-  @Field(() => [SurveyAnswersRequestDto])
-  surveyAnswers?: SurveyAnswersRequestDto[];
-}
-
-@ObjectType()
 export class CustomerDto extends BaseDto {
   @Field({ nullable: true })
   avatar?: string;
@@ -171,20 +87,6 @@ export class CustomerDto extends BaseDto {
 
   @Field({ nullable: true })
   facebook?: string;
-
-  @Field(() => [FamilyInformationDto], { nullable: true, defaultValue: [] })
-  familyInformation: FamilyInformationDto[];
-
-  @Field(() => [EmergencyContactDto], { nullable: true, defaultValue: [] })
-  emergencyContact: EmergencyContactDto[];
-
-  @Field(() => MedicalProfileDto, { nullable: true })
-  medicalProfile: MedicalProfileDto;
-  //   @Field(() => [CustomerDto], { nullable: true })
-  //   friends?: CustomerDto[];
-
-  //   @Field(() => CustomerDto, { nullable: true })
-  //   friend?: CustomerDto;
 }
 
 @ObjectType()
