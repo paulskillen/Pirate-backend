@@ -2,10 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import * as dotenv from 'dotenv';
 import * as mongoose from 'mongoose';
-
-dotenv.config();
 
 @Injectable()
 export class MongoModule {
@@ -16,7 +13,7 @@ export class MongoModule {
     return MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        uri,
+        uri: configService.get<string>('MONGODB_URI'),
         connectionFactory: (connection) => {
           connection.plugin(require('mongoose-paginate'));
           connection.plugin(require('mongoose-aggregate-paginate-v2'));
