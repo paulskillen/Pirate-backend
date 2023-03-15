@@ -7,18 +7,18 @@ import { CustomerService } from './customer.service';
 import { Customer, CustomerSchema } from './schema/customer.schema';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      { name: Customer.name, schema: CustomerSchema },
-    ]),
-    CacheModule.register({ isGlobal: true, max: 10000 }),
-  ],
-  providers: [
-    CustomerResolver,
-    CustomerService,
-    CustomerGetter,
-    // CustomerActivity,
-  ],
-  exports: [CustomerService, CustomerGetter, CustomerResolver],
+    imports: [
+        MongooseModule.forFeature([
+            { name: Customer.name, schema: CustomerSchema },
+        ]),
+        CacheModule.register({ isGlobal: true, max: 10000 }),
+    ],
+    providers: [
+        CustomerResolver,
+        CustomerService,
+        CustomerGetter,
+        // CustomerActivity,
+    ],
+    exports: [CustomerService, CustomerGetter, CustomerResolver],
 })
 export class CustomerModule {}

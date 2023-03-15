@@ -1,12 +1,12 @@
 import { CACHE_MANAGER, Inject } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import {
-  Args,
-  Context,
-  Parent,
-  Query,
-  ResolveField,
-  Resolver,
+    Args,
+    Context,
+    Parent,
+    Query,
+    ResolveField,
+    Resolver,
 } from '@nestjs/graphql';
 import { CustomerService } from './customer.service';
 import { CustomerDto, CustomerPaginateResponse } from './dto/customer.dto';
@@ -17,18 +17,18 @@ import { CustomerGetter } from './customer.getter';
 
 @Resolver(() => CustomerDto)
 export class CustomerResolver {
-  constructor(
-    private readonly customerService: CustomerService,
-    private readonly customerGetter: CustomerGetter,
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) {}
+    constructor(
+        private readonly customerService: CustomerService,
+        private readonly customerGetter: CustomerGetter,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    ) {}
 
-  // ****************************** RESOLVER FIELD ********************************//
+    // ****************************** RESOLVER FIELD ********************************//
 
-  @Query(() => CustomerPaginateResponse)
-  async listCustomerForAdmin(
-    @Args('paginate') paginate: CustomerPaginateRequest,
-  ): Promise<CustomerInterface> {
-    return await this.customerGetter.findAll(paginate, {});
-  }
+    @Query(() => CustomerPaginateResponse)
+    async listCustomerForAdmin(
+        @Args('paginate') paginate: CustomerPaginateRequest,
+    ): Promise<CustomerInterface> {
+        return await this.customerGetter.findAll(paginate, {});
+    }
 }

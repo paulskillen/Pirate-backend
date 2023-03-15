@@ -14,10 +14,10 @@ export const ESIM_GO_API_KEY = process.env.ESIM_GO_API_KEY;
 export const ESimGoApiHeader = { 'X-API-Key': ESIM_GO_API_KEY };
 
 export enum Gender {
-  MALE = 'MALE',
-  FEMALE = 'FEMALE',
-  NOT_SAY = 'NOT_SAY',
+    MALE = 'MALE',
+    FEMALE = 'FEMALE',
+    NOT_SAY = 'NOT_SAY',
 }
 registerEnumType(Gender, {
-  name: 'Gender',
+    name: 'Gender',
 });

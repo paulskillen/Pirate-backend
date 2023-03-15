@@ -1,0 +1,4 @@
+{
+    "reactSnippets.settings.prettierEnabled": false,
+    "prettier.useEditorConfig": true
+}

@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { SchemaTypes } from 'mongoose';
 
 @Schema({
-  _id: false,
+    _id: false,
 })
 export class BaseSchedule {}
 

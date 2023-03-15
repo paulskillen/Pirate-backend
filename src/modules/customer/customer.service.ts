@@ -9,9 +9,9 @@ import { SoftDeleteModel } from 'mongoose-delete';
 import { AppCacheServiceManager } from 'src/setting/cache/app-cache.service';
 import { ErrorNotFound } from 'src/common/errors/errors.constant';
 import {
-  CUSTOMER_PREFIX_CODE,
-  CUSTOMER_CACHE_KEY,
-  CUSTOMER_CACHE_TTL,
+    CUSTOMER_PREFIX_CODE,
+    CUSTOMER_CACHE_KEY,
+    CUSTOMER_CACHE_TTL,
 } from './customer.constant';
 import { EVENT_CUSTOMER } from './customer.event';
 import { CustomerGetter } from './customer.getter';
@@ -21,115 +21,120 @@ import { AppHelper } from 'src/common/helper/app.helper';
 
 @Injectable()
 export class CustomerService {
-  constructor(
-    @InjectModel(Customer.name)
-    private customerModel: PaginateModel<CustomerDocument>,
+    constructor(
+        @InjectModel(Customer.name)
+        private customerModel: PaginateModel<CustomerDocument>,
 
-    @InjectModel(Customer.name)
-    private customerSoftDeleteModel: SoftDeleteModel<CustomerDocument>,
+        @InjectModel(Customer.name)
+        private customerSoftDeleteModel: SoftDeleteModel<CustomerDocument>,
 
-    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
-    private eventEmitter: EventEmitter2,
+        @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+        private eventEmitter: EventEmitter2,
 
-    @Inject(forwardRef(() => CustomerGetter))
-    private customerGetter: CustomerGetter,
-  ) {}
+        @Inject(forwardRef(() => CustomerGetter))
+        private customerGetter: CustomerGetter,
+    ) {}
 
-  customerCache = new AppCacheServiceManager(
-    this.cacheManager,
-    CUSTOMER_CACHE_KEY,
-    CUSTOMER_CACHE_TTL,
-  );
-
-  // ****************************** UTIL METHOD ********************************//
-
-  private async getNextNo(): Promise<string> {
-    const lastBooking = await this.customerModel
-      .findOne(
-        {
-          bookingNo: { $regex: CUSTOMER_PREFIX_CODE },
-        },
-        {},
-        { sort: { _id: -1 } },
-      )
-      .limit(1)
-      .lean();
-    const dateTime = moment().format('YYMMDD');
-    const lastBookingNo =
-      lastBooking?.customerNo ?? `${CUSTOMER_PREFIX_CODE}${dateTime}00000`;
-    const newId = AppHelper.generateIdWithCode(
-      lastBookingNo,
-      CUSTOMER_PREFIX_CODE,
-      dateTime,
+    customerCache = new AppCacheServiceManager(
+        this.cacheManager,
+        CUSTOMER_CACHE_KEY,
+        CUSTOMER_CACHE_TTL,
     );
-    return newId;
-  }
 
-  // ****************************** QUERY DATA ********************************//
+    // ****************************** UTIL METHOD ********************************//
 
-  async findByIds(ids: string[]): Promise<Customer[] | undefined> {
-    return this.customerModel.find({ _id: { $in: ids } }).exec();
-  }
-
-  async findById(id: string): Promise<Customer | undefined> {
-    return this.customerModel.findOne({ _id: id }).exec();
-  }
-
-  // ****************************** MUTATE DATA ********************************//
-
-  async create(input: CustomerCreateRequest, auth: any): Promise<Customer> {
-    const customerNo = await this.getNextNo();
-    if (!customerNo) {
-      throw Error('Something went wrong! Can not create Customer No !');
-    }
-    const saveData: Partial<Customer> = {
-      ...input,
-      customerNo,
-    } as unknown as Customer;
-    // if (auth?._id) {
-    //   Object.assign(saveData, { createByAdmin: auth._id });
-    // }
-    const created = await this.customerModel.create(saveData);
-    if (created) {
-      this.eventEmitter.emit(EVENT_CUSTOMER.CREATE, {
-        payload: input,
-        auth,
-        data: created,
-      });
-      await this.customerCache.set(created);
-
-      //   this.customerActivity.addOperation({
-      //     message: `created new customer #${created?.customerId}`,
-      //     auth,
-      //     input,
-      //     updatedData: created,
-      //   });
-    }
-    return created;
-  }
-
-  async updateAvatar(id: string, avatar: string, auth: any): Promise<Customer> {
-    const updated = await this.customerModel.findByIdAndUpdate(
-      { _id: id },
-      { $set: { $set: { avatar } } },
-      { new: true, upsert: false },
-    );
-    if (updated) {
-      this.eventEmitter.emit(EVENT_CUSTOMER.UPDATE_AVATAR, {
-        payload: { avatar },
-        auth,
-        data: updated,
-      });
-      await this.customerCache.set(updated);
-
-      //   this.customerActivity.addOperation({
-      //     message: `updated avatar of customer #${updated?.customerId}`,
-      //     auth,
-      //     input: { avatar },
-      //     updatedData: updated,
-      //   });
+    private async getNextNo(): Promise<string> {
+        const lastBooking = await this.customerModel
+            .findOne(
+                {
+                    bookingNo: { $regex: CUSTOMER_PREFIX_CODE },
+                },
+                {},
+                { sort: { _id: -1 } },
+            )
+            .limit(1)
+            .lean();
+        const dateTime = moment().format('YYMMDD');
+        const lastBookingNo =
+            lastBooking?.customerNo ??
+            `${CUSTOMER_PREFIX_CODE}${dateTime}00000`;
+        const newId = AppHelper.generateIdWithCode(
+            lastBookingNo,
+            CUSTOMER_PREFIX_CODE,
+            dateTime,
+        );
+        return newId;
     }
 
-    return updated;
-  }
+    // ****************************** QUERY DATA ********************************//
+
+    async findByIds(ids: string[]): Promise<Customer[] | undefined> {
+        return this.customerModel.find({ _id: { $in: ids } }).exec();
+    }
+
+    async findById(id: string): Promise<Customer | undefined> {
+        return this.customerModel.findOne({ _id: id }).exec();
+    }
+
+    // ****************************** MUTATE DATA ********************************//
+
+    async create(input: CustomerCreateRequest, auth: any): Promise<Customer> {
+        const customerNo = await this.getNextNo();
+        if (!customerNo) {
+            throw Error('Something went wrong! Can not create Customer No !');
+        }
+        const saveData: Partial<Customer> = {
+            ...input,
+            customerNo,
+        } as unknown as Customer;
+        // if (auth?._id) {
+        //   Object.assign(saveData, { createByAdmin: auth._id });
+        // }
+        const created = await this.customerModel.create(saveData);
+        if (created) {
+            this.eventEmitter.emit(EVENT_CUSTOMER.CREATE, {
+                payload: input,
+                auth,
+                data: created,
+            });
+            await this.customerCache.set(created);
+
+            //   this.customerActivity.addOperation({
+            //     message: `created new customer #${created?.customerId}`,
+            //     auth,
+            //     input,
+            //     updatedData: created,
+            //   });
+        }
+        return created;
+    }
+
+    async updateAvatar(
+        id: string,
+        avatar: string,
+        auth: any,
+    ): Promise<Customer> {
+        const updated = await this.customerModel.findByIdAndUpdate(
+            { _id: id },
+            { $set: { $set: { avatar } } },
+            { new: true, upsert: false },
+        );
+        if (updated) {
+            this.eventEmitter.emit(EVENT_CUSTOMER.UPDATE_AVATAR, {
+                payload: { avatar },
+                auth,
+                data: updated,
+            });
+            await this.customerCache.set(updated);
+
+            //   this.customerActivity.addOperation({
+            //     message: `updated avatar of customer #${updated?.customerId}`,
+            //     auth,
+            //     input: { avatar },
+            //     updatedData: updated,
+            //   });
+        }
+
+        return updated;
+    }
 }

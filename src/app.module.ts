@@ -10,14 +10,14 @@ import { MongoModule } from './setting/database/mongo.module';
 import { GraphQlModule } from './setting/graphql/graphql.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    CacheModule.register({ isGlobal: true, max: 10000 }),
-    MongoModule.config(),
-    GraphQlModule.config(),
-    EventEmitterModule.forRoot({ wildcard: true }),
-    ModulesModule,
-    CustomerModuleModules,
-  ],
+    imports: [
+        ConfigModule.forRoot({ isGlobal: true }),
+        CacheModule.register({ isGlobal: true, max: 10000 }),
+        MongoModule.config(),
+        GraphQlModule.config(),
+        EventEmitterModule.forRoot({ wildcard: true }),
+        ModulesModule,
+        CustomerModuleModules,
+    ],
 })
 export class AppModule {}
