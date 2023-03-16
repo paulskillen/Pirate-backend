@@ -5,7 +5,6 @@ dotenv.config();
 
 export const ESIM_GO_CACHE_KEY = '{esim_go_cache_key}:';
 export const ESIM_GO_CACHE_TTL = 600;
-
 export const ESIM_GO_PREFIX_CODE = 'ESG';
 
 export const ESIM_GO_API_URL = process.env.ESIM_GO_API_URL;
