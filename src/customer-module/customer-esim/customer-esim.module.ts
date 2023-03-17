@@ -1,5 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { ESimGoModule } from 'src/modules/third-party/eSim-go/eSimGo.module';
+import { ESimGoModule } from 'src/modules/provider/eSim-go/eSimGo.module';
 import { CustomerESimResolver } from './customer-esim.resolver';
 
 @Module({

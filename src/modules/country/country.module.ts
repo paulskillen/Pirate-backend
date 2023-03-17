@@ -1,5 +1,6 @@
 import { CacheModule, forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { CountryService } from './country.service';
 
 @Module({
     imports: [
@@ -8,7 +9,7 @@ import { MongooseModule } from '@nestjs/mongoose';
         // ]),
         CacheModule.register({ isGlobal: true, max: 10000 }),
     ],
-    providers: [],
-    exports: [],
+    providers: [CountryService],
+    exports: [CountryService],
 })
 export class CountryModule {}

@@ -16,8 +16,9 @@ import {
     ESIM_GO_CACHE_TTL,
 } from './eSimGo.constant';
 import { AppHelper } from 'src/common/helper/app.helper';
-import { LIST_ESIM_ASSIGNED_TO_YOU } from './apis/eSimGo.api';
+import { LIST_BUNDLES, LIST_ESIM_ASSIGNED_TO_YOU } from './apis/eSimGo.api';
 import { AxiosError } from 'axios';
+import { filter, includes, map } from 'lodash';
 
 @Injectable()
 export class ESimGoService {
@@ -58,5 +59,33 @@ export class ESimGoService {
         );
         return data;
     }
-    // ****************************** MUTATE DATA ********************************//
+
+    // ****************************** BUNDLES ********************************//
+
+    async getListBundle(): Promise<any> {
+        const { data } = await firstValueFrom(
+            this.httpService
+                .get(LIST_BUNDLES, {
+                    headers: { ...ESimGoApiHeader },
+                })
+                .pipe(
+                    catchError((error: AxiosError) => {
+                        this.logger.error(error.response.data);
+                        throw 'An error happened!';
+                    }),
+                ),
+        );
+        return data;
+    }
+
+    async getListBundleFromCountry(countryCode: string): Promise<any> {
+        const bundles = await this.getListBundle();
+        const data = filter(bundles, (item) =>
+            includes(
+                map(item?.countries ?? [], (i) => i?.iso),
+                countryCode,
+            ),
+        );
+        return data;
+    }
 }

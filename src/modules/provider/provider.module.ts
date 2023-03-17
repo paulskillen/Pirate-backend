@@ -5,4 +5,4 @@ import { ESimGoModule } from './eSim-go/eSimGo.module';
     imports: [ESimGoModule],
     exports: [ESimGoModule],
 })
-export class ThirdPartyModule {}
+export class ProviderModule {}
