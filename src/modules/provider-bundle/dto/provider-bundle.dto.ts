@@ -15,17 +15,17 @@ export class ProviderBundleDto extends BaseDto {
     @Field(() => String, { nullable: true })
     description?: string;
 
-    @Field(() => String, { nullable: true })
-    dataAmount: string;
-
-    @Field(() => String, { nullable: true })
-    duration: string;
-
-    @Field({ nullable: true })
-    price: string;
+    @Field(() => JSON, { nullable: true })
+    dataAmount: any;
 
     @Field(() => JSON, { nullable: true })
-    bundleData?: JSON;
+    duration: any;
+
+    @Field(() => JSON, { nullable: true })
+    price: any;
+
+    @Field(() => JSON, { nullable: true })
+    bundleData?: any;
 }
 
 @ObjectType()
@@ -33,6 +33,6 @@ export class ProviderBundlePaginateResponse {
     @Field(() => [ProviderBundleDto])
     data: ProviderBundleDto[];
 
-    @Field()
+    @Field({ nullable: true })
     pagination?: PaginateResponse;
 }

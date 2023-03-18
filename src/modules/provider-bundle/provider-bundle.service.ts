@@ -1,22 +1,11 @@
-import {
-    CACHE_MANAGER,
-    forwardRef,
-    Inject,
-    Injectable,
-    Logger,
-} from '@nestjs/common';
+import { CACHE_MANAGER, Inject, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { HttpService } from '@nestjs/axios';
 import { Cache } from 'cache-manager';
-import { AppCacheServiceManager } from 'src/setting/cache/app-cache.service';
-// import {
-//     ESimGoApiHeader,
-//     ESIM_GO_CACHE_KEY,
-//     ESIM_GO_CACHE_TTL,
-// } from './eSimGo.constant';
-import { AppHelper } from 'src/common/helper/app.helper';
-import { AxiosError } from 'axios';
+import { forEach } from 'lodash';
 import { ESimGoService } from '../provider/eSim-go/eSimGo.service';
+import { ESimGoBundle } from '../provider/eSim-go/schema/bundle/eSimGo-bundle.schema';
+import { ProviderName } from '../provider/provider.constant';
+import { ProviderBundleDto } from './dto/provider-bundle.dto';
 
 @Injectable()
 export class ProviderBundleService {
@@ -40,6 +29,21 @@ export class ProviderBundleService {
         return '0';
     }
 
+    private mapEsimBundleToProviderBundle(
+        bundle: ESimGoBundle,
+    ): ProviderBundleDto {
+        const { dataAmount, price, name, duration, description } = bundle || {};
+        return {
+            name,
+            provider: ProviderName.ESIM_GO,
+            bundleData: bundle as any,
+            dataAmount,
+            duration,
+            description,
+            price,
+        };
+    }
+
     // ****************************** QUERY DATA ********************************//
 
     async findAll(): Promise<any> {
@@ -47,10 +51,17 @@ export class ProviderBundleService {
     }
 
     async findAllFromCountry(countryCode: string): Promise<any> {
+        const mappedData: ProviderBundleDto[] = [];
         const esimBundles = await this.eSimGoService.getListBundleFromCountry(
             countryCode,
         );
-        return esimBundles;
+        if (esimBundles?.length > 0) {
+            forEach(esimBundles, (bundle) => {
+                const mapped = this.mapEsimBundleToProviderBundle(bundle);
+                mappedData.push(mapped);
+            });
+        }
+        return { data: mappedData };
     }
     // ****************************** MUTATE DATA ********************************//
 }

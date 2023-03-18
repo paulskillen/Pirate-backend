@@ -78,8 +78,8 @@ export class ESimGoService {
         return data;
     }
 
-    async getListBundleFromCountry(countryCode: string): Promise<any> {
-        const bundles = await this.getListBundle();
+    async getListBundleFromCountry(countryCode: string): Promise<Array<any>> {
+        const { bundles = [] } = (await this.getListBundle()) || {};
         const data = filter(bundles, (item) =>
             includes(
                 map(item?.countries ?? [], (i) => i?.iso),
