@@ -63,23 +63,37 @@ export class ESimGoService {
     // ****************************** BUNDLES ********************************//
 
     async getListBundle(): Promise<any> {
-        const { data } = await firstValueFrom(
-            this.httpService
-                .get(LIST_BUNDLES, {
-                    headers: { ...ESimGoApiHeader },
-                })
-                .pipe(
-                    catchError((error: AxiosError) => {
-                        this.logger.error(error.response.data);
-                        throw 'An error happened!';
-                    }),
-                ),
-        );
-        return data;
+        let page = 0;
+        let pageCount = 1;
+        let allData: Array<any> = [];
+        while (page <= pageCount) {
+            page++;
+            const { data } = await firstValueFrom(
+                this.httpService
+                    .get(LIST_BUNDLES, {
+                        headers: { ...ESimGoApiHeader },
+                        params: { perPage: 100, page },
+                    })
+                    .pipe(
+                        catchError((error: AxiosError) => {
+                            this.logger.error(error.response.data);
+                            throw 'An error happened!';
+                        }),
+                    ),
+            );
+            if (data?.pageCount) {
+                pageCount = data?.pageCount;
+            }
+            if (data?.bundles) {
+                allData = [...allData, ...(data?.bundles ?? [])];
+            }
+        }
+
+        return allData;
     }
 
     async getListBundleFromCountry(countryCode: string): Promise<Array<any>> {
-        const { bundles = [] } = (await this.getListBundle()) || {};
+        const bundles = (await this.getListBundle()) || [];
         const data = filter(bundles, (item) =>
             includes(
                 map(item?.countries ?? [], (i) => i?.iso),
