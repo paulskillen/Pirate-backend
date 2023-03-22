@@ -9,13 +9,26 @@ export class AppCacheServiceManager {
     ) {}
 
     private getKeyFromData = (data: any) =>
-        `${this.cacheKey}${data?._id?.toString?.()}`;
+        `${this.cacheKey}${data?.id?.toString?.()}`;
 
-    async set(data: any, ttl?: number): Promise<boolean> {
-        const keyToSet = this.getKeyFromData(data);
+    async get(key: string): Promise<any> {
+        try {
+            const data = await this.cacheManager.get(key);
+            return data;
+        } catch (error) {
+            console.error({ error });
+        }
+    }
+
+    async set(
+        data: any,
+        option?: { ttl?: number; key?: string; useStringify?: boolean },
+    ): Promise<boolean> {
+        const { ttl, key, useStringify = true } = option || {};
+        const keyToSet = key || this.getKeyFromData(data);
         await this.cacheManager.set(
             keyToSet,
-            JSON.stringify(data),
+            useStringify ? JSON.stringify(data) : data,
             ttl || this.cacheTtl,
         );
         return true;

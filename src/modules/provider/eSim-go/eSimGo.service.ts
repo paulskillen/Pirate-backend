@@ -4,6 +4,7 @@ import {
     Inject,
     Injectable,
     Logger,
+    OnModuleInit,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { HttpService } from '@nestjs/axios';
@@ -11,7 +12,9 @@ import { catchError, firstValueFrom } from 'rxjs';
 import { Cache } from 'cache-manager';
 import { AppCacheServiceManager } from 'src/setting/cache/app-cache.service';
 import {
-    ESimGoApiHeader,
+    ESIM_GO_API_HEADER,
+    ESIM_GO_BUNDLES_CACHE_KEY,
+    ESIM_GO_BUNDLES_CACHE_TTL,
     ESIM_GO_CACHE_KEY,
     ESIM_GO_CACHE_TTL,
 } from './eSimGo.constant';
@@ -21,7 +24,7 @@ import { AxiosError } from 'axios';
 import { filter, includes, map } from 'lodash';
 
 @Injectable()
-export class ESimGoService {
+export class ESimGoService implements OnModuleInit {
     constructor(
         @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
         private eventEmitter: EventEmitter2,
@@ -36,6 +39,14 @@ export class ESimGoService {
         ESIM_GO_CACHE_TTL,
     );
 
+    async onModuleInit() {
+        await this.getListBundle();
+    }
+
+    async findByIds() {
+        return true;
+    }
+
     // ****************************** UTIL METHOD ********************************//
 
     private async getNextNo(): Promise<string> {
@@ -48,7 +59,7 @@ export class ESimGoService {
         const { data } = await firstValueFrom(
             this.httpService
                 .get(LIST_ESIM_ASSIGNED_TO_YOU, {
-                    headers: { ...ESimGoApiHeader },
+                    headers: { ...ESIM_GO_API_HEADER },
                 })
                 .pipe(
                     catchError((error: AxiosError) => {
@@ -65,27 +76,44 @@ export class ESimGoService {
     async getListBundle(): Promise<any> {
         let page = 0;
         let pageCount = 1;
-        let allData: Array<any> = [];
-        while (page <= pageCount) {
-            page++;
-            const { data } = await firstValueFrom(
-                this.httpService
-                    .get(LIST_BUNDLES, {
-                        headers: { ...ESimGoApiHeader },
-                        params: { perPage: 100, page },
-                    })
-                    .pipe(
-                        catchError((error: AxiosError) => {
-                            this.logger.error(error.response.data);
-                            throw 'An error happened!';
-                        }),
-                    ),
-            );
-            if (data?.pageCount) {
-                pageCount = data?.pageCount;
+        let allData: Array<any> = await this.eSimGoCache.get(
+            ESIM_GO_BUNDLES_CACHE_KEY,
+        );
+
+        if (!allData) {
+            while (page <= pageCount) {
+                page++;
+                const { data } = await firstValueFrom(
+                    this.httpService
+                        .get(LIST_BUNDLES, {
+                            headers: { ...ESIM_GO_API_HEADER },
+                            params: { perPage: 100, page },
+                        })
+                        .pipe(
+                            catchError((error: AxiosError) => {
+                                this.logger.error(error.response.data);
+                                throw 'An error happened!';
+                            }),
+                        ),
+                );
+                if (data?.pageCount) {
+                    pageCount = data?.pageCount;
+                }
+                if (data?.bundles) {
+                    allData = [...(allData || []), ...(data?.bundles ?? [])];
+                }
             }
-            if (data?.bundles) {
-                allData = [...allData, ...(data?.bundles ?? [])];
+            try {
+                await this.eSimGoCache.set(allData, {
+                    key: ESIM_GO_BUNDLES_CACHE_KEY,
+                    useStringify: false,
+                    ttl: ESIM_GO_BUNDLES_CACHE_TTL,
+                });
+            } catch (error) {
+                console.log(
+                    '🚀 >>>>>> file: eSimGo.service.ts:112 >>>>>> ESimGoService >>>>>> getListBundle >>>>>> error:',
+                    error,
+                );
             }
         }
 

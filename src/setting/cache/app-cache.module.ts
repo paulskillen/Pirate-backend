@@ -1,5 +1,9 @@
-const appCacheModule = () => ({});
+import EsimGoLoader, {
+    EsimGoLoaderType,
+} from 'src/modules/provider/eSim-go/cache/eSimGo.loader';
 
-export default appCacheModule;
+const AppLoaderModule = () => ({ ...EsimGoLoader });
 
-export type AppLoaderType = any;
+export default AppLoaderModule;
+
+export type AppLoaderType = EsimGoLoaderType;
