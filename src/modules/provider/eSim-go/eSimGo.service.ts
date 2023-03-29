@@ -19,7 +19,11 @@ import {
     ESIM_GO_CACHE_TTL,
 } from './eSimGo.constant';
 import { AppHelper } from 'src/common/helper/app.helper';
-import { LIST_BUNDLES, LIST_ESIM_ASSIGNED_TO_YOU } from './apis/eSimGo.api';
+import {
+    LIST_BUNDLES,
+    LIST_ESIM_ASSIGNED_TO_YOU,
+    PROCESS_ORDERS,
+} from './apis/eSimGo.api';
 import { AxiosError } from 'axios';
 import { filter, includes, map } from 'lodash';
 
@@ -128,6 +132,25 @@ export class ESimGoService implements OnModuleInit {
                 countryCode,
             ),
         );
+        return data;
+    }
+
+    // ****************************** ORDERS ********************************//
+
+    async createOrder(payload: any): Promise<any> {
+        const { data } = await firstValueFrom(
+            this.httpService
+                .post(PROCESS_ORDERS, payload, {
+                    headers: { ...ESIM_GO_API_HEADER },
+                })
+                .pipe(
+                    catchError((error: AxiosError) => {
+                        this.logger.error(error.response.data);
+                        throw 'An error happened!';
+                    }),
+                ),
+        );
+
         return data;
     }
 }
