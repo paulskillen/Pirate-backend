@@ -36,4 +36,8 @@ lerna-debug.log*
 !.vscode/launch.json
 !.vscode/extensions.json
 
+# Env 
 .env
+
+# Boiler-plate
+/boiler-plate/*

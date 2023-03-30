@@ -1,0 +1,4 @@
+export const EVENT_ORDER = {
+    CREATE: 'EVENT_ORDER_CREATE',
+    UPDATE: 'EVENT_ORDER_UPDATE',
+};
