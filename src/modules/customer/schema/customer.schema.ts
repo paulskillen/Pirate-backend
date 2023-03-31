@@ -4,6 +4,23 @@ import { Document, SchemaTypes } from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate';
 import { PaginateResponse } from 'src/common/paginate/dto/paginate.dto';
 
+@Schema({})
+export class BaseCustomer {
+    _id: string;
+
+    @Prop({ required: true, unique: true })
+    customerNo: string;
+
+    @Prop()
+    avatar?: string;
+
+    @Prop({ type: SchemaTypes.String })
+    phone: string;
+
+    @Prop({ type: SchemaTypes.String })
+    email: string;
+}
+
 @Schema({
     timestamps: true,
     toJSON: {
@@ -14,23 +31,9 @@ import { PaginateResponse } from 'src/common/paginate/dto/paginate.dto';
         virtuals: true,
     },
 })
-export class Customer {
-    _id: string;
-
-    @Prop()
-    avatar?: string;
-
-    @Prop({ required: true, unique: true })
-    customerNo: string;
-
+export class Customer extends BaseCustomer {
     @Prop({ type: SchemaTypes.ObjectId, required: true })
     nationality: string;
-
-    @Prop({ type: SchemaTypes.String })
-    phone: string;
-
-    @Prop({ type: SchemaTypes.String })
-    email: string;
 
     @Prop()
     lineId?: string;

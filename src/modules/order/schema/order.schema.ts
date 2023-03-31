@@ -4,6 +4,7 @@ import { Document, SchemaTypes } from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate';
 import { PaginateResponse } from 'src/common/paginate/dto/paginate.dto';
 import { OrderStatus, OrderStockAdjustmentStatus } from '../order.constant';
+import { OrderCustomer, OrderCustomerSchema } from './sub/order.sub-schema';
 
 @Schema({
     timestamps: true,
@@ -23,12 +24,12 @@ export class Order {
     @Prop({
         type: () => OrderStatus,
         required: true,
-        default: OrderStatus.ACTIVE,
+        default: OrderStatus.PENDING,
     })
     status: OrderStatus;
 
-    @Prop()
-    pickupCode: string;
+    @Prop({ type: () => OrderCustomerSchema, required: false })
+    customer?: OrderCustomer;
 
     @Prop()
     brandTaxId: string;
