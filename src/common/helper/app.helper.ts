@@ -134,4 +134,28 @@ export class AppHelper {
         const newId = `${code}${dateTime}${newIdNumberWithZero}`;
         return newId;
     }
+
+    static generateNextDataNo(
+        lastId: string,
+        code: string,
+        dateTime: string,
+        numberOfDigit = 5,
+    ): string | null {
+        const lastIdRemoveCode = lastId.replace(/^\D+/g, '');
+        const lastIdRemoveTime = lastIdRemoveCode.substring(6);
+        const lastIdNumber = parseInt(lastIdRemoveTime.replace(/^\D+/g, ''));
+        if (isNaN(lastIdNumber)) {
+            console.error(
+                `Error when create new Id Number ! Last Id Number ${lastId} is invalid!`,
+            );
+            return null;
+        }
+        const newIdNumber = isNaN(lastIdNumber) ? 1 : lastIdNumber + 1;
+        const newIdNumberWithZero = AppHelper.addLeadingZeros(
+            newIdNumber,
+            numberOfDigit,
+        );
+        const newId = `${code}${dateTime}${newIdNumberWithZero}`;
+        return newId;
+    }
 }

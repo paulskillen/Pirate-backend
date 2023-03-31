@@ -20,11 +20,12 @@ export class Order {
     @Prop({ required: true, unique: true, index: -1 })
     orderNo: string;
 
-    @Prop({ required: true, index: 'text' })
-    name: string;
-
-    @Prop({ required: true, index: 'text' })
-    code: string;
+    @Prop({
+        type: () => OrderStatus,
+        required: true,
+        default: OrderStatus.ACTIVE,
+    })
+    status: OrderStatus;
 
     @Prop()
     pickupCode: string;
@@ -34,13 +35,6 @@ export class Order {
 
     @Prop()
     phone: string;
-
-    @Prop({
-        type: () => OrderStatus,
-        required: true,
-        default: OrderStatus.ACTIVE,
-    })
-    status: OrderStatus;
 
     @Prop({
         type: () => OrderStockAdjustmentStatus,
@@ -54,6 +48,8 @@ export class Order {
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
+
+OrderSchema.index({ orderNo: -1 });
 
 export type OrderDocument = Order & Document;
 

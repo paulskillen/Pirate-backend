@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
+import * as moment from 'moment';
 import { InjectModel } from '@nestjs/mongoose';
 import { PaginateModel, Types } from 'mongoose';
 import { SoftDeleteModel } from 'mongoose-delete';
@@ -9,17 +10,18 @@ import {
     OrderPaginateInput,
     OrderUpdateInput,
 } from './dto/order.input';
-import {
-    OrderDocument,
-    Order,
-    OrderInterface,
-} from './schema/order.schema';
-import { PaginateHelper } from 'src/common/helpers/paginate.helper';
+import { OrderDocument, Order, OrderInterface } from './schema/order.schema';
 import { OrderHelper } from './order.helper';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EVENT_ORDER } from './order.event';
-import { CacheServiceManager } from 'src/cache/cache.service';
-import { ORDER_CACHE_KEY, ORDER_CACHE_TTL } from './order.constant';
+import { AppCacheServiceManager } from 'src/setting/cache/app-cache.service';
+import {
+    ORDER_CACHE_KEY,
+    ORDER_CACHE_TTL,
+    ORDER_PREFIX_CODE,
+} from './order.constant';
+import { PaginateHelper } from 'src/common/helper/paginate.helper';
+import { AppHelper } from 'src/common/helper/app.helper';
 
 @Injectable()
 export class TemplateService {
@@ -34,7 +36,7 @@ export class TemplateService {
         private eventEmitter: EventEmitter2,
     ) {}
 
-    templateCache = new CacheServiceManager(
+    templateCache = new AppCacheServiceManager(
         this.cacheManager,
         ORDER_CACHE_KEY,
         ORDER_CACHE_TTL,
@@ -42,14 +44,28 @@ export class TemplateService {
 
     // ****************************** UTIL METHOD ********************************//
 
-    private async getNextNo(): Promise<number> {
-        const template = await this.templateModel
-            .findOne({}, {}, { sort: { _id: -1 } })
+    private async getNextNo(): Promise<string> {
+        const latestData = await this.templateModel
+            .findOne(
+                {
+                    templateNo: {
+                        $regex: ORDER_PREFIX_CODE,
+                    },
+                },
+                {},
+                { sort: { _id: -1 } },
+            )
+            .limit(1)
             .lean();
-        if (template?.orderNo) {
-            return template?.orderNo + 1;
-        }
-        return 1;
+        const dateTime = moment().format('YYMMDD');
+        const latestNo =
+            latestData?.orderNo ?? `${ORDER_PREFIX_CODE}${dateTime}00000`;
+        const newId = AppHelper.generateNextDataNo(
+            latestNo,
+            ORDER_PREFIX_CODE,
+            dateTime,
+        );
+        return newId;
     }
 
     // ****************************** QUERY DATA ********************************//
@@ -78,10 +94,7 @@ export class TemplateService {
         return await this.templateModel.findById(id).exec();
     }
 
-    async findByIds(
-        ids: string[],
-        auth?: any,
-    ): Promise<Order[] | undefined> {
+    async findByIds(ids: string[], auth?: any): Promise<Order[] | undefined> {
         return this.templateModel.find({ _id: { $in: ids } }).exec();
     }
 
