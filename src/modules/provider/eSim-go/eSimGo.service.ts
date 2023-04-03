@@ -27,16 +27,17 @@ import {
 import { AxiosError } from 'axios';
 import { filter, find, includes, map } from 'lodash';
 import { ESimGoBundle } from './schema/bundle/eSimGo-bundle.schema';
+import { ESimGoOrderInput } from './dto/order/eSimGo-order.dto';
+import { ErrorInternalException } from 'src/common/errors/errors.constant';
 
 @Injectable()
 export class ESimGoService implements OnModuleInit {
+    private readonly logger = new Logger(ESimGoService.name);
     constructor(
         @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
         private eventEmitter: EventEmitter2,
         private httpService: HttpService,
     ) {}
-
-    private readonly logger = new Logger(ESimGoService.name);
 
     eSimGoCache = new AppCacheServiceManager(
         this.cacheManager,
@@ -102,7 +103,7 @@ export class ESimGoService implements OnModuleInit {
                         .pipe(
                             catchError((error: AxiosError) => {
                                 this.logger.error(error.response.data);
-                                throw 'An error happened!';
+                                throw ErrorInternalException(error?.message);
                             }),
                         ),
                 );
@@ -120,9 +121,11 @@ export class ESimGoService implements OnModuleInit {
                     ttl: ESIM_GO_BUNDLES_CACHE_TTL,
                 });
             } catch (error) {
-                console.log(
-                    '🚀 >>>>>> file: eSimGo.service.ts:112 >>>>>> ESimGoService >>>>>> getListBundle >>>>>> error:',
-                    error,
+                this.logger.error(
+                    'Get list bundles from EsimGo  failed with error',
+                    {
+                        error,
+                    },
                 );
             }
         }
@@ -145,20 +148,26 @@ export class ESimGoService implements OnModuleInit {
 
     // ****************************** ORDERS ********************************//
 
-    async createOrder(payload: any): Promise<any> {
-        const { data } = await firstValueFrom(
-            this.httpService
-                .post(PROCESS_ORDERS, payload, {
-                    headers: { ...ESIM_GO_API_HEADER },
-                })
-                .pipe(
-                    catchError((error: AxiosError) => {
-                        this.logger.error(error.response.data);
-                        throw 'An error happened!';
-                    }),
-                ),
-        );
+    async createOrder(payload: ESimGoOrderInput): Promise<any> {
+        try {
+            const { data } = await firstValueFrom(
+                this.httpService
+                    .post(PROCESS_ORDERS, payload, {
+                        headers: { ...ESIM_GO_API_HEADER },
+                    })
+                    .pipe(
+                        catchError((error: AxiosError) => {
+                            this.logger.error(error.response.data);
+                            throw ErrorInternalException(error?.message);
+                        }),
+                    ),
+            );
 
-        return data;
+            return data;
+        } catch (error) {
+            this.logger.error('Create EsimGo order failed with error', {
+                error,
+            });
+        }
     }
 }

@@ -1,23 +1,24 @@
 import { CACHE_MANAGER, Inject, forwardRef } from '@nestjs/common';
 import { Args, Query, Resolver } from '@nestjs/graphql';
 import { Cache } from 'cache-manager';
-import JSON from 'graphql-type-json';
-import { ProviderBundlePaginateResponse } from 'src/modules/provider-bundle/dto/provider-bundle.dto';
-import { ProviderBundleService } from 'src/modules/provider-bundle/provider-bundle.service';
+import { OrderCreateInput } from 'src/modules/order/dto/order.input';
+import { OrderService } from 'src/modules/order/order.service';
+import { CustomerOrderDetailResponse } from './dto/customer-order.dto';
 
 @Resolver()
 export class CustomerOrderResolver {
     constructor(
-        private providerBundleService: ProviderBundleService,
+        private orderService: OrderService,
         @Inject(CACHE_MANAGER) private cacheManager: Cache,
     ) {}
 
     // ****************************** RESOLVER FIELD ********************************//
 
-    @Query(() => ProviderBundlePaginateResponse)
-    async listBundleFromCountryForCustomer(
-        @Args('country') country: string,
+    @Query(() => CustomerOrderDetailResponse)
+    async createOrderForCustomer(
+        @Args('input') input: OrderCreateInput,
     ): Promise<any> {
-        return await this.providerBundleService.findAllFromCountry(country);
+        const data = await this.orderService.create(input);
+        return { data };
     }
 }

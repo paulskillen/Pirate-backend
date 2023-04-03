@@ -54,29 +54,35 @@ export type OrderProductDocument = OrderProduct & Document;
 
 @Schema({ _id: false, timestamps: false })
 export class OrderPayment {
-    @Prop({ type: () => SchemaTypes.Mixed, required: false, default: null })
-    paymentData?: any;
-
-    @Prop({ type: () => PaymentMethod, required: true })
-    method: PaymentMethod;
-
-    @Prop({ type: SchemaTypes.Date, required: false, default: null })
-    createdAt: Date;
-
-    @Prop({ type: SchemaTypes.Date, required: false, default: null })
-    updatedAt: Date;
-
     @Prop({
         type: () => OrderPaymentStatus,
         required: true,
         default: OrderPaymentStatus.PENDING,
     })
     status: OrderPaymentStatus;
+
+    @Prop({ type: SchemaTypes.String, index: 'text' })
+    paymentNo: string;
+
+    @Prop({ type: () => PaymentMethod, required: true })
+    method: PaymentMethod;
+
+    @Prop({ type: SchemaTypes.Number, required: false, default: 0 })
+    total: number;
+
+    @Prop({ type: () => SchemaTypes.Mixed, required: false, default: null })
+    paymentData?: any;
+
+    @Prop({ type: SchemaTypes.Date, required: false, default: null })
+    createdAt: Date;
+
+    @Prop({ type: SchemaTypes.Date, required: false, default: null })
+    updatedAt: Date;
 }
 export const OrderPaymentSchema = SchemaFactory.createForClass(OrderProduct);
 export type OrderPaymentDocument = OrderPayment & Document;
 
-@Schema({ _id: false })
+@Schema({ _id: false, timestamps: false })
 export class OrderFee {
     @Prop({ type: SchemaTypes.String, required: true })
     name: string;
@@ -84,5 +90,5 @@ export class OrderFee {
     @Prop({ type: SchemaTypes.Number, required: false, default: 0 })
     total: number;
 }
-
 export const OrderFeeSchema = SchemaFactory.createForClass(OrderFee);
+export type OrderFeeDocument = OrderFee & Document;

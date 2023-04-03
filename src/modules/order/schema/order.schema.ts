@@ -13,8 +13,8 @@ import {
     OrderProductDocument,
     OrderPaymentSchema,
     OrderPaymentDocument,
-    OrderFee,
     OrderFeeSchema,
+    OrderFeeDocument,
 } from './sub/order.sub-schema';
 
 @Schema({
@@ -68,11 +68,11 @@ export class Order {
     total: number;
 
     @Prop({
-        type: [{ type: () => [OrderFeeSchema] }],
+        type: [OrderFeeSchema],
         required: false,
         default: [],
     })
-    fee?: OrderFee[];
+    fee?: OrderFeeDocument[];
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
