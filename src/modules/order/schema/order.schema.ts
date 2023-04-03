@@ -49,17 +49,20 @@ export class Order {
     @Prop({ type: () => [OrderProductSchema], required: true, default: [] })
     products: OrderProductDocument[];
 
-    @Prop({ type: () => OrderPaymentSchema, default: [] })
+    @Prop({ type: () => OrderPaymentSchema, required: false, default: null })
     payment?: OrderPaymentDocument[];
 
     @Prop({ type: SchemaTypes.Date, required: false, default: new Date() })
-    expired?: Date;
+    expiryDate?: Date;
 
     @Prop({ type: SchemaTypes.String, required: false, default: null })
     remark?: string;
 
     @Prop({ type: SchemaTypes.ObjectId })
     createByAdmin?: string;
+
+    @Prop({ type: SchemaTypes.Mixed, required: false, default: null })
+    providerOrder?: any;
 
     @Prop({ type: SchemaTypes.Number, required: true, default: 0 })
     subTotal: number;

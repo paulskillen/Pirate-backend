@@ -4,6 +4,7 @@ export const ORDER_CACHE_KEY = '{order}:';
 export const ORDER_CACHE_TTL = 600;
 
 export const ORDER_PREFIX_CODE = 'ON';
+export const ORDER_EXPIRY_DAYS = 7;
 
 export enum OrderStatus {
     PENDING_PAYMENT = 'PENDING_PAYMENT',

@@ -5,7 +5,7 @@ import { OrderDto } from 'src/modules/order/dto/order.dto';
 
 @ObjectType()
 export class CustomerOrderDto extends OmitType(OrderDto, [
-    'expired',
+    'expiryDate',
     'updatedAt',
 ]) {}
 

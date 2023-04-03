@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType, PickType } from '@nestjs/graphql';
+import { Field, Float, Int, ObjectType, PickType } from '@nestjs/graphql';
 import { BaseDto } from 'src/common/base/base.dto';
 import { PaginateResponse } from 'src/common/paginate/dto/paginate.dto';
 import { CustomerBasicDto } from 'src/modules/customer/dto/customer.dto';
@@ -55,10 +55,16 @@ export class OrderDto extends BaseDto {
     payment: OrderPaymentDto[];
 
     @Field(() => JSON, { nullable: true })
-    expired?: Date;
+    expiryDate?: Date;
 
     @Field({ nullable: true })
     remark: string;
+
+    @Field(() => Float)
+    total: number;
+
+    @Field(() => Float)
+    subTotal: number;
 }
 
 @ObjectType()

@@ -8,6 +8,7 @@ import { SoftDeleteModel } from 'mongoose-delete';
 import {
     OrderCreateInput,
     OrderPaginateInput,
+    OrderProcessInput,
     OrderUpdateInput,
 } from './dto/order.input';
 import { OrderDocument, Order, OrderInterface } from './schema/order.schema';
@@ -19,6 +20,7 @@ import {
     OrderStatus,
     ORDER_CACHE_KEY,
     ORDER_CACHE_TTL,
+    ORDER_EXPIRY_DAYS,
     ORDER_PREFIX_CODE,
 } from './order.constant';
 import { PaginateHelper } from 'src/common/helper/paginate.helper';
@@ -99,6 +101,7 @@ export class OrderService {
         const saveData: Partial<Order> = {
             status: OrderStatus.PENDING_PAYMENT,
             remark,
+            expiryDate: moment().add(ORDER_EXPIRY_DAYS, 'day').toDate(),
         } as unknown as Order;
         let total = 0;
         let subTotal = 0;
@@ -203,6 +206,35 @@ export class OrderService {
     // ****************************** MUTATE DATA ********************************//
 
     async create(input: OrderCreateInput, auth?: any): Promise<Order> {
+        const { customer, products } = input || {};
+        const exist = await this.orderModel.find(
+            {
+                status: { $in: [OrderStatus.PENDING_PAYMENT] },
+                'customer._id': customer,
+                'products.product.id': products?.[0]?.id,
+                payment: null,
+                expiryDate: { $gt: new Date() },
+            },
+            null,
+            { sort: { _id: -1 } },
+        );
+        if (exist && exist?.length > 0) {
+            const foundOrder = exist?.[0];
+            const foundOrderUpdated = await this.orderModel.findOneAndUpdate(
+                {
+                    _id: foundOrder?._id,
+                },
+                {
+                    $set: {
+                        expiryDate: moment()
+                            .add(ORDER_EXPIRY_DAYS, 'day')
+                            .toDate(),
+                    },
+                },
+                { new: true },
+            );
+            return foundOrder;
+        }
         const saveData: Partial<Order> = await this.getOrderSavingPayload(
             input,
             auth,
@@ -244,6 +276,31 @@ export class OrderService {
                 });
                 await this.orderCache.set(updated);
                 return updated;
+            } else throw new Error();
+        } catch (error) {
+            throw new Error();
+        }
+    }
+
+    async process(
+        id: string,
+        input: OrderProcessInput,
+        auth?: any,
+    ): Promise<Order> {
+        try {
+            const processed = await this.orderModel.findOne({
+                _id: new Types.ObjectId(id),
+                status: { $in: [OrderStatus.PENDING_PAYMENT] },
+                'customer._id': input?.customer,
+            });
+            if (processed) {
+                this.eventEmitter.emit(EVENT_ORDER.UPDATE, {
+                    payload: input,
+                    auth,
+                    data: processed,
+                });
+                await this.orderCache.set(processed);
+                return processed;
             } else throw new Error();
         } catch (error) {
             throw new Error();
