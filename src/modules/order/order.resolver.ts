@@ -1,14 +1,14 @@
 import { CACHE_MANAGER, Inject } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { Context, Parent, ResolveField, Resolver } from '@nestjs/graphql';
-import { TemplateService } from './order.service';
+import { OrderService } from './order.service';
 import { OrderDto } from './dto/order.dto';
 import { Order } from './schema/order.schema';
 
 @Resolver(() => OrderDto)
-export class TemplateResolver {
+export class OrderResolver {
     constructor(
-        private readonly templateService: TemplateService,
+        private readonly templateService: OrderService,
         @Inject(CACHE_MANAGER) private cacheManager: Cache,
     ) {}
 

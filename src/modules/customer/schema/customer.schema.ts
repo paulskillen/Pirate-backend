@@ -3,22 +3,55 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, SchemaTypes } from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate';
 import { PaginateResponse } from 'src/common/paginate/dto/paginate.dto';
+import { CustomerTitle, Gender } from '../customer.constant';
 
 @Schema({})
 export class BaseCustomer {
     _id: string;
 
-    @Prop({ required: true, unique: true })
+    @Prop()
+    id?: string;
+
+    @Prop({ type: SchemaTypes.String, required: true, unique: true })
     customerNo: string;
 
     @Prop()
     avatar?: string;
 
-    @Prop({ type: SchemaTypes.String })
-    phone: string;
+    @Prop({
+        type: () => CustomerTitle,
+        required: false,
+    })
+    title: CustomerTitle;
 
-    @Prop({ type: SchemaTypes.String })
+    @Prop({ required: false })
+    firstName: string;
+
+    @Prop({ required: false })
+    lastName: string;
+
+    @Prop({ required: false })
+    nickname: string;
+
+    @Prop({ type: () => Gender, required: false })
+    gender?: Gender;
+
+    @Prop({ type: SchemaTypes.Date, required: false })
+    birthDay?: Date;
+
+    // contact information
+
+    @Prop({ type: SchemaTypes.String, required: true, unique: true })
     email: string;
+
+    @Prop({
+        type: SchemaTypes.String,
+        required: false,
+    })
+    phoneCode?: string;
+
+    @Prop({ type: SchemaTypes.String, required: false })
+    phone?: string;
 }
 
 @Schema({
@@ -32,8 +65,8 @@ export class BaseCustomer {
     },
 })
 export class Customer extends BaseCustomer {
-    @Prop({ type: SchemaTypes.ObjectId, required: true })
-    nationality: string;
+    @Prop({ type: SchemaTypes.ObjectId, required: false })
+    nationality?: string;
 
     @Prop()
     lineId?: string;

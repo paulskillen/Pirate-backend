@@ -1,5 +1,5 @@
 import { Field, Int, ObjectType, PickType } from '@nestjs/graphql';
-import { Prop, Schema } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import JSON from 'graphql-type-json';
 import { SchemaTypes } from 'mongoose';
 import { BaseDto } from 'src/common/base/base.dto';
@@ -15,7 +15,7 @@ import { ProviderName } from 'src/modules/provider/provider.constant';
         },
     },
 })
-export class ProviderBundleDto {
+export class ProviderBundle {
     @Prop(() => String)
     id: string;
 
@@ -41,11 +41,7 @@ export class ProviderBundleDto {
     bundleData?: any;
 }
 
-@ObjectType()
-export class ProviderBundlePaginateResponse {
-    @Field(() => [ProviderBundleDto])
-    data: ProviderBundleDto[];
+export const ProviderBundleSchema =
+    SchemaFactory.createForClass(ProviderBundle);
 
-    @Field({ nullable: true })
-    pagination?: PaginateResponse;
-}
+export type ProviderBundleDocument = ProviderBundle & Document;

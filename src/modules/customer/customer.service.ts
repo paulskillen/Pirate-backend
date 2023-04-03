@@ -16,7 +16,11 @@ import {
 import { EVENT_CUSTOMER } from './customer.event';
 import { CustomerGetter } from './customer.getter';
 import { CustomerCreateRequest } from './dto/customer.input';
-import { Customer, CustomerDocument } from './schema/customer.schema';
+import {
+    BaseCustomer,
+    Customer,
+    CustomerDocument,
+} from './schema/customer.schema';
 import { AppHelper } from 'src/common/helper/app.helper';
 
 @Injectable()
@@ -64,6 +68,40 @@ export class CustomerService {
             dateTime,
         );
         return newId;
+    }
+
+    async getBasicCustomer(
+        user: string | Customer,
+    ): Promise<BaseCustomer | null> {
+        const customerData =
+            typeof user === 'string' ? await this.findById(user) : user;
+        const {
+            _id,
+            customerNo,
+            title,
+            firstName,
+            lastName,
+            nickname,
+            gender,
+            birthDay,
+            phoneCode,
+            phone,
+            email,
+        } = customerData || {};
+        return {
+            _id,
+            id: _id?.toString?.(),
+            customerNo,
+            title,
+            firstName,
+            lastName,
+            nickname,
+            gender,
+            birthDay,
+            phoneCode,
+            phone,
+            email,
+        };
     }
 
     // ****************************** QUERY DATA ********************************//

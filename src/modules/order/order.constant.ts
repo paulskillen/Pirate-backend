@@ -6,17 +6,33 @@ export const ORDER_CACHE_TTL = 600;
 export const ORDER_PREFIX_CODE = 'ON';
 
 export enum OrderStatus {
-    PENDING = 'PENDING',
+    PENDING_PAYMENT = 'PENDING_PAYMENT',
+    PARTIALLY_PAID = 'PARTIALLY_PAID',
+    ORDER_PROCESSING = 'ORDER_PROCESSING',
+    DELIVERED = 'DELIVERED',
     COMPLETED = 'COMPLETED',
+    CANCELLED = 'CANCELLED',
+    REFUNDED = 'REFUNDED',
 }
 registerEnumType(OrderStatus, {
     name: 'OrderStatus',
 });
 
-export enum OrderStockAdjustmentStatus {
-    ALLOW = 'ALLOW',
-    NOT_ALLOW = 'NOT_ALLOW',
+export enum OrderPaymentStatus {
+    PENDING = 'PENDING',
+    COMPLETED = 'COMPLETED',
+    ERROR = 'ERROR',
 }
-registerEnumType(OrderStockAdjustmentStatus, {
-    name: 'OrderStockAdjustmentStatus',
+registerEnumType(OrderPaymentStatus, {
+    name: 'OrderPaymentStatus',
+});
+
+export enum PaymentMethod {
+    PAYPAL = 'PAYPAL',
+    BANK_TRANSFER = 'BANK_TRANSFER',
+    CREDIT_CARD = 'CREDIT_CARD',
+    CASH = 'CASH',
+}
+registerEnumType(PaymentMethod, {
+    name: 'PaymentMethod',
 });

@@ -3,12 +3,12 @@ import { Cache } from 'cache-manager';
 import * as DataLoader from 'dataloader';
 import CacheControl from 'src/setting/cache/app-cache.control';
 import { ORDER_CACHE_KEY, ORDER_CACHE_TTL } from '../order.constant';
-import { TemplateService } from '../order.service';
+import { OrderService } from '../order.service';
 
 const OrderLoader = {
     order: new DataLoader(async (idsServiceWithCache) => {
         let cache: Cache;
-        let service: TemplateService;
+        let service: OrderService;
         const prefixIds: any[] = idsServiceWithCache.map((id: any): any => {
             service = id[1];
             cache = id[2];
@@ -28,7 +28,7 @@ const OrderLoader = {
     }),
 
     orderList: new DataLoader(async (idsServiceWithCache) => {
-        let service: TemplateService;
+        let service: OrderService;
         let cache: Cache;
         const prefixIds: string[] = [];
         idsServiceWithCache.forEach((id) => {

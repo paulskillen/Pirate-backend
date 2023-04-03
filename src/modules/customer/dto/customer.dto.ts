@@ -9,9 +9,6 @@ export class CustomerDto extends BaseDto {
     @Field({ nullable: true })
     avatar?: string;
 
-    @Field(() => Int, { nullable: true })
-    customerId: number;
-
     @Field(() => String, { nullable: true })
     customerNo: string;
 
@@ -19,22 +16,13 @@ export class CustomerDto extends BaseDto {
     title: CustomerTitle;
 
     @Field({ nullable: true })
-    fullNameTh: string;
+    fullName: string;
 
     @Field({ nullable: true })
-    fullNameEn: string;
+    firstName: string;
 
     @Field({ nullable: true })
-    firstNameTh: string;
-
-    @Field({ nullable: true })
-    lastNameTh: string;
-
-    @Field({ nullable: true })
-    firstNameEn: string;
-
-    @Field({ nullable: true })
-    lastNameEn: string;
+    lastName: string;
 
     @Field({ nullable: true })
     nickname: string;
@@ -45,39 +33,16 @@ export class CustomerDto extends BaseDto {
     @Field(() => JSON, { nullable: true })
     birthDay?: Date;
 
-    // privacy information
-
-    @Field({ nullable: true })
-    citizenId: string;
-
-    //   @Field(() => CountryDto, { nullable: true })
-    //   nationality: CountryDto;
-
-    @Field({ nullable: true })
-    passportNo?: string;
-
-    @Field(() => JSON, { nullable: true })
-    passportExp?: Date;
-
-    @Field({ nullable: true })
-    religion?: string;
-
-    @Field({ nullable: true })
-    maritalStatus: string;
-
-    @Field({ nullable: true })
-    numberOfChild?: number;
-
     // contact information
 
     @Field({ nullable: true })
-    phone: string;
+    phoneCode?: string;
 
     @Field({ nullable: true })
-    alternativePhone: string;
+    phone?: string;
 
     @Field({ nullable: true })
-    email?: string;
+    email: string;
 
     @Field({ nullable: true })
     lineId?: string;
@@ -108,14 +73,12 @@ export class CustomerPaginateResponse {
 export class CustomerBasicDto extends PickType(CustomerDto, [
     'id',
     'avatar',
-    'firstNameEn',
-    'lastNameEn',
-    'firstNameTh',
-    'lastNameTh',
+    'firstName',
+    'lastName',
+    'fullName',
     'nickname',
     'gender',
     'phone',
     'email',
-    'customerId',
-    'birthDay',
+    'customerNo',
 ]) {}

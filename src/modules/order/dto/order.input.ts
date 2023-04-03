@@ -2,34 +2,35 @@ import {
     Field,
     GraphQLISODateTime,
     InputType,
+    Int,
     OmitType,
     PartialType,
 } from '@nestjs/graphql';
 import { PaginateRequest } from 'src/common/paginate/dto/paginate.dto';
-import { OrderStatus, OrderStockAdjustmentStatus } from '../order.constant';
+import { ProviderName } from 'src/modules/provider/provider.constant';
+
+@InputType()
+export class OrderProductInput {
+    @Field()
+    id: string;
+
+    @Field(() => Int, { defaultValue: 1 })
+    quantity: number;
+}
 
 @InputType()
 export class OrderCreateInput {
-    @Field()
-    name: string;
+    @Field({ nullable: true })
+    customer?: string;
 
-    @Field()
-    code: string;
+    @Field(() => [OrderProductInput])
+    products: OrderProductInput[];
 
-    @Field()
-    pickupCode: string;
+    @Field(() => ProviderName)
+    provider: ProviderName;
 
-    @Field()
-    brandTaxId: string;
-
-    @Field()
-    phone: string;
-
-    @Field(() => OrderStatus)
-    status: OrderStatus;
-
-    @Field(() => OrderStockAdjustmentStatus)
-    manualStockAdjustment: OrderStockAdjustmentStatus;
+    @Field({ nullable: true })
+    remark?: string;
 }
 
 @InputType()

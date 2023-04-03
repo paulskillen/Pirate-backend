@@ -3,7 +3,6 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, SchemaTypes } from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate';
 import { PaginateResponse } from 'src/common/paginate/dto/paginate.dto';
-import { ProviderName } from 'src/modules/provider/provider.constant';
 import { OrderStatus } from '../order.constant';
 import {
     OrderContactDocument,
@@ -12,6 +11,10 @@ import {
     OrderContactSchema,
     OrderProductSchema,
     OrderProductDocument,
+    OrderPaymentSchema,
+    OrderPaymentDocument,
+    OrderFee,
+    OrderFeeSchema,
 } from './sub/order.sub-schema';
 
 @Schema({
@@ -27,44 +30,55 @@ export class Order {
     @Prop({ type: SchemaTypes.String })
     _id: string;
 
-    @Prop({ required: true, unique: true })
+    @Prop({ type: () => SchemaTypes.String, required: true, unique: true })
     orderNo: string;
-
-    @Prop({ type: () => ProviderName, required: true, unique: true })
-    provider: ProviderName;
 
     @Prop({
         type: () => OrderStatus,
         required: true,
-        default: OrderStatus.PENDING,
+        default: OrderStatus.PENDING_PAYMENT,
     })
     status: OrderStatus;
 
-    @Prop({ type: () => OrderCustomerSchema, required: false })
-    customer?: OrderCustomerDocument;
+    @Prop({ type: () => OrderCustomerSchema, required: true })
+    customer: OrderCustomerDocument;
 
     @Prop({ type: () => OrderContactSchema, required: false })
     contact?: OrderContactDocument;
 
-    @Prop({ type: () => [OrderProductSchema] })
+    @Prop({ type: () => [OrderProductSchema], required: true, default: [] })
     products: OrderProductDocument[];
 
-    @Prop({ type: SchemaTypes.String, required: false, default: null })
-    remark: string;
-
-    @Prop({ type: SchemaTypes.Mixed })
-    payment?: any;
+    @Prop({ type: () => OrderPaymentSchema, default: [] })
+    payment?: OrderPaymentDocument[];
 
     @Prop({ type: SchemaTypes.Date, required: false, default: new Date() })
-    expired: Date;
+    expired?: Date;
+
+    @Prop({ type: SchemaTypes.String, required: false, default: null })
+    remark?: string;
 
     @Prop({ type: SchemaTypes.ObjectId })
     createByAdmin?: string;
+
+    @Prop({ type: SchemaTypes.Number, required: true, default: 0 })
+    subTotal: number;
+
+    @Prop({ type: SchemaTypes.Number, required: true, default: 0 })
+    total: number;
+
+    @Prop({
+        type: [{ type: () => [OrderFeeSchema] }],
+        required: false,
+        default: [],
+    })
+    fee?: OrderFee[];
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
 
 OrderSchema.index({ orderNo: -1 });
+OrderSchema.index({ 'customer._id': -1 });
 
 OrderSchema.plugin(mongoosePaginate);
 

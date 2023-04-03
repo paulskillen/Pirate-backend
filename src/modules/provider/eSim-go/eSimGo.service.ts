@@ -25,7 +25,8 @@ import {
     PROCESS_ORDERS,
 } from './apis/eSimGo.api';
 import { AxiosError } from 'axios';
-import { filter, includes, map } from 'lodash';
+import { filter, find, includes, map } from 'lodash';
+import { ESimGoBundle } from './schema/bundle/eSimGo-bundle.schema';
 
 @Injectable()
 export class ESimGoService implements OnModuleInit {
@@ -77,7 +78,12 @@ export class ESimGoService implements OnModuleInit {
 
     // ****************************** BUNDLES ********************************//
 
-    async getListBundle(): Promise<any> {
+    async findBundleById(id: string) {
+        const bundles = (await this.getListBundle()) || [];
+        return find(bundles, (item) => item?.name === id);
+    }
+
+    async getListBundle(): Promise<ESimGoBundle[]> {
         let page = 0;
         let pageCount = 1;
         let allData: Array<any> = await this.eSimGoCache.get(
@@ -124,7 +130,9 @@ export class ESimGoService implements OnModuleInit {
         return allData;
     }
 
-    async getListBundleFromCountry(countryCode: string): Promise<Array<any>> {
+    async getListBundleFromCountry(
+        countryCode: string,
+    ): Promise<Array<ESimGoBundle>> {
         const bundles = (await this.getListBundle()) || [];
         const data = filter(bundles, (item) =>
             includes(
