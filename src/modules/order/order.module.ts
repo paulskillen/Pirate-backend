@@ -6,10 +6,12 @@ import { Order, OrderSchema } from './schema/order.schema';
 import { forwardRef } from '@nestjs/common';
 import { ProviderBundleModule } from '../provider-bundle/provider-bundle.module';
 import { CustomerModule } from '../customer/customer.module';
+import { ProviderModule } from '../provider/provider.module';
 
 @Module({
     imports: [
         CustomerModule,
+        ProviderModule,
         ProviderBundleModule,
         MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
     ],

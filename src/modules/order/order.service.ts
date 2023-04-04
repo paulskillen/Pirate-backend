@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
+import { CACHE_MANAGER, Inject, Injectable, Logger } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import * as moment from 'moment';
 import { InjectModel } from '@nestjs/mongoose';
@@ -30,14 +30,22 @@ import {
     OrderCustomer,
     OrderProduct,
 } from './schema/sub/order.sub-schema';
-import { isEmpty } from 'lodash';
+import { find, isEmpty, reduce } from 'lodash';
 import { CustomerService } from '../customer/customer.service';
 import { ProviderBundleService } from '../provider-bundle/provider-bundle.service';
 import { Customer } from '../customer/schema/customer.schema';
-import { ErrorBadRequest } from 'src/common/errors/errors.constant';
+import {
+    ErrorBadRequest,
+    ErrorNotFound,
+} from 'src/common/errors/errors.constant';
+import { ProviderName } from '../provider/provider.constant';
+import { ESimGoService } from '../provider/eSim-go/eSimGo.service';
+import { ESimGoOrderInput } from '../provider/eSim-go/dto/order/eSimGo-order.dto';
 
 @Injectable()
 export class OrderService {
+    private readonly logger = new Logger(OrderService.name);
+
     constructor(
         @InjectModel(Order.name)
         private orderModel: PaginateModel<OrderDocument>,
@@ -52,6 +60,8 @@ export class OrderService {
         private providerBundleService: ProviderBundleService,
 
         private eventEmitter: EventEmitter2,
+
+        private eSimGoService: ESimGoService,
     ) {}
 
     orderCache = new AppCacheServiceManager(
@@ -59,6 +69,82 @@ export class OrderService {
         ORDER_CACHE_KEY,
         ORDER_CACHE_TTL,
     );
+
+    providers = [
+        {
+            id: ProviderName.ESIM_GO,
+            service: this.eSimGoService,
+            mapFunc: this.mapOrderDataToEsimGoOrderPayload,
+        },
+    ];
+
+    // ****************************** VALIDATE METHOD ********************************//
+
+    private validateProcessOrderInput(
+        input: OrderProcessInput,
+        order: Order,
+    ): { error: boolean; message: string | null } {
+        const {
+            status,
+            _id,
+            products,
+            total,
+            subTotal,
+            customer: orderCustomer,
+        } = order;
+        const { payment = [], customer } = input;
+        const orderId = _id?.toString();
+        if (status !== OrderStatus.PENDING_PAYMENT) {
+            return {
+                error: true,
+                message: `Order #${orderId} with status ${status} is not valid to process!`,
+            };
+        }
+        if (customer !== orderCustomer?._id?.toString?.()) {
+            return {
+                error: true,
+                message: `Customer in payment  is not match order customer !`,
+            };
+        }
+        if (isEmpty(payment)) {
+            return { error: true, message: 'Payment input is empty !' };
+        }
+        const totalPayment = reduce(
+            payment,
+            (res, item, index) => res + item?.total ?? 0,
+            0,
+        );
+
+        if (!totalPayment || totalPayment < subTotal) {
+            return {
+                error: true,
+                message: `Payment total is not match order total !`,
+            };
+        }
+
+        return {
+            error: false,
+            message: null,
+        };
+    }
+
+    private async mapOrderDataToEsimGoOrderPayload(
+        orderData: Order,
+    ): Promise<ESimGoOrderInput> {
+        const esimGoOrder: ESimGoOrderInput['Order'] = [];
+        const { products } = orderData;
+        for (const product of products) {
+            const { id, name } = product?.product || {};
+            const proQty = product?.quantity ?? 1;
+            esimGoOrder.push({ type: '', item: id || name, quantity: proQty });
+        }
+
+        return {
+            type: '',
+            assign: true,
+            Order: esimGoOrder,
+        };
+    }
 
     // ****************************** UTIL METHOD ********************************//
 
@@ -283,24 +369,44 @@ export class OrderService {
     }
 
     async process(
-        id: string,
+        orderId: string,
         input: OrderProcessInput,
         auth?: any,
     ): Promise<Order> {
         try {
-            const processed = await this.orderModel.findOne({
-                _id: new Types.ObjectId(id),
-                status: { $in: [OrderStatus.PENDING_PAYMENT] },
-                'customer._id': input?.customer,
-            });
-            if (processed) {
-                this.eventEmitter.emit(EVENT_ORDER.UPDATE, {
-                    payload: input,
-                    auth,
-                    data: processed,
-                });
-                await this.orderCache.set(processed);
-                return processed;
+            const foundOrder = await this.orderModel.findById(orderId);
+            if (!foundOrder) {
+                throw ErrorNotFound(`Order #${orderId} is not found!`);
+            }
+            const { error, message } = await this.validateProcessOrderInput(
+                input,
+                foundOrder,
+            );
+            if (error) {
+                throw ErrorBadRequest(message);
+            }
+            const processing = await this.orderModel.findOneAndUpdate(
+                {
+                    _id: new Types.ObjectId(orderId),
+                },
+                { $set: { status: OrderStatus.ORDER_PROCESSING } },
+                { new: true },
+            );
+            if (processing) {
+                for (const product of foundOrder?.products) {
+                    const foundProvider = find(
+                        this.providers,
+                        (i) => i?.id === product?.product?.provider,
+                    );
+                }
+
+                // this.eventEmitter.emit(EVENT_ORDER.UPDATE, {
+                //     payload: input,
+                //     auth,
+                //     data: processing,
+                // });
+                await this.orderCache.set(processing);
+                return processing;
             } else throw new Error();
         } catch (error) {
             throw new Error();
