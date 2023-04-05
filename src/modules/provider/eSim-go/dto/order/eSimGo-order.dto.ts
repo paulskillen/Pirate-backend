@@ -1,7 +1,7 @@
 export class ESimGoOrderInput {
-    type: string;
+    type: 'validate' | 'transaction';
 
     assign: boolean;
 
-    Order: { type: string; item: string; quantity: number }[];
+    Order: { type: 'bundle'; item: string; quantity: number }[];
 }

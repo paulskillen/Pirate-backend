@@ -19,6 +19,9 @@ export class OrderProductInput {
 
     @Field(() => Int, { defaultValue: 1 })
     quantity: number;
+
+    @Field(() => ProviderName)
+    provider: ProviderName;
 }
 
 @InputType()
@@ -40,9 +43,6 @@ export class OrderCreateInput {
 
     @Field(() => [OrderProductInput])
     products: OrderProductInput[];
-
-    @Field(() => ProviderName)
-    provider: ProviderName;
 
     @Field({ nullable: true })
     remark?: string;

@@ -27,7 +27,6 @@ import {
     },
 })
 export class Order {
-    @Prop({ type: SchemaTypes.String })
     _id: string;
 
     @Prop({ type: () => SchemaTypes.String, required: true, unique: true })

@@ -136,11 +136,15 @@ export class OrderService {
         for (const product of products) {
             const { id, name } = product?.product || {};
             const proQty = product?.quantity ?? 1;
-            esimGoOrder.push({ type: '', item: id || name, quantity: proQty });
+            esimGoOrder.push({
+                type: 'bundle',
+                item: id || name,
+                quantity: proQty,
+            });
         }
 
         return {
-            type: '',
+            type: 'transaction',
             assign: true,
             Order: esimGoOrder,
         };
@@ -183,7 +187,7 @@ export class OrderService {
         input: OrderCreateInput,
         auth: any,
     ): Promise<Partial<Order>> {
-        const { products, provider, remark, customer } = input;
+        const { products, remark, customer } = input;
         const saveData: Partial<Order> = {
             status: OrderStatus.PENDING_PAYMENT,
             remark,
@@ -219,15 +223,16 @@ export class OrderService {
                 const orderPro =
                     await this.providerBundleService.getBundleFromProvider(
                         product?.id,
-                        provider,
+                        product?.provider,
                     );
                 if (orderPro) {
                     orderProducts.push({
                         product: orderPro as any,
                         quantity: product?.quantity ?? 1,
                     });
-                    total += product?.quantity ?? 1 * orderPro?.price;
-                    subTotal += product?.quantity ?? 1 * orderPro?.price;
+                    total += (product?.quantity || 1) * (orderPro?.price || 1);
+                    subTotal +=
+                        (product?.quantity || 1) * (orderPro?.price || 1);
                 } else throw ErrorBadRequest(`${product?.id} is not valid !`);
             }
             Object.assign(saveData, {
@@ -339,7 +344,7 @@ export class OrderService {
                 return created;
             } else throw new Error();
         } catch (error) {
-            throw new Error();
+            throw new Error(error);
         }
     }
 
@@ -393,11 +398,31 @@ export class OrderService {
                 { new: true },
             );
             if (processing) {
-                for (const product of foundOrder?.products) {
-                    const foundProvider = find(
-                        this.providers,
-                        (i) => i?.id === product?.product?.provider,
-                    );
+                const foundProvider = find(
+                    this.providers,
+                    (i) =>
+                        i?.id === processing?.products?.[0]?.product?.provider,
+                );
+                const { service, mapFunc } = foundProvider || {};
+                if (service) {
+                    const createOrderPayload: any = await mapFunc(processing);
+                    if (!isEmpty(createOrderPayload)) {
+                        console.log(
+                            '🚀 >>>>>> file: order.service.ts:410 >>>>>> OrderService >>>>>> createOrderPayload:',
+                            createOrderPayload,
+                        );
+                        const providerOrder = await service.createOrder(
+                            createOrderPayload,
+                        );
+                        this.logger.log(
+                            '🚀 >>>>>> file: order.service.ts:415 >>>>>> OrderService >>>>>> providerOrder:',
+                            providerOrder,
+                        );
+                    } else {
+                        this.logger.error(
+                            'Can not map provider order payload !',
+                        );
+                    }
                 }
 
                 // this.eventEmitter.emit(EVENT_ORDER.UPDATE, {
