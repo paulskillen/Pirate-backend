@@ -185,6 +185,7 @@ export class OrderService {
         } as unknown as Order;
         let total = 0;
         let subTotal = 0;
+        let provider: any = null;
         let orderContact: Partial<OrderContact> = null;
 
         if (customer) {
@@ -209,6 +210,7 @@ export class OrderService {
 
         if (products?.length > 0) {
             const orderProducts: OrderProduct[] = [];
+            provider = products?.[0]?.provider;
             for (const product of products) {
                 const orderPro =
                     await this.providerBundleService.getBundleFromProvider(
@@ -234,7 +236,7 @@ export class OrderService {
             Object.assign(saveData, { createdByAdmin: auth._id });
         }
 
-        Object.assign(saveData, { total, subTotal });
+        Object.assign(saveData, { total, subTotal, provider });
 
         return saveData;
     }
@@ -446,14 +448,14 @@ export class OrderService {
                     data: processing,
                 });
                 await this.orderCache.set(processing);
-                return await this.complete(processing);
+                return await this.generate(processing);
             } else throw new Error();
         } catch (error) {
             throw new Error();
         }
     }
 
-    async complete(payload: Order, auth?: any): Promise<Order> {
+    async generate(payload: Order, auth?: any): Promise<Order> {
         try {
             const foundProvider = find(
                 this.providers,
@@ -461,7 +463,7 @@ export class OrderService {
             );
             const { service, mapFunc, verifyComplete, getRefData } =
                 foundProvider || {};
-            let complete: any = null;
+            let generated: any = null;
             if (service) {
                 const createOrderPayload: any = await mapFunc(payload);
                 if (!isEmpty(createOrderPayload)) {
@@ -475,13 +477,13 @@ export class OrderService {
                     const isCompleted = await verifyComplete(providerOrder);
                     const refData = await getRefData(providerOrder);
                     if (isCompleted) {
-                        complete = await this.orderModel.findOneAndUpdate(
+                        generated = await this.orderModel.findOneAndUpdate(
                             {
                                 _id: payload?._id,
                             },
                             {
                                 $set: {
-                                    status: OrderStatus.COMPLETED,
+                                    status: OrderStatus.ORDER_GENERATED,
                                     providerOrder,
                                     ...(refData || {}),
                                 },
@@ -492,14 +494,14 @@ export class OrderService {
                     this.logger.error('Can not map provider order payload !');
                 }
             }
-            if (complete) {
-                this.eventEmitter.emit(EVENT_ORDER.COMPLETE, {
+            if (generated) {
+                this.eventEmitter.emit(EVENT_ORDER.GENERATE, {
                     payload,
                     auth,
-                    data: complete,
+                    data: generated,
                 });
-                await this.orderCache.set(complete);
-                return complete;
+                await this.orderCache.set(generated);
+                return generated;
             } else throw new Error();
         } catch (error) {
             throw new Error();

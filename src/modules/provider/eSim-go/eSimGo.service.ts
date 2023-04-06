@@ -20,6 +20,7 @@ import {
 } from './eSimGo.constant';
 import { AppHelper } from 'src/common/helper/app.helper';
 import {
+    GET_ESIM_FROM_ORDER_REF,
     LIST_BUNDLES,
     LIST_ESIM_ASSIGNED_TO_YOU,
     PROCESS_ORDERS,
@@ -66,6 +67,23 @@ export class ESimGoService implements OnModuleInit {
             this.httpService
                 .get(LIST_ESIM_ASSIGNED_TO_YOU, {
                     headers: { ...ESIM_GO_API_HEADER },
+                })
+                .pipe(
+                    catchError((error: AxiosError) => {
+                        this.logger.error(error.response.data);
+                        throw 'An error happened!';
+                    }),
+                ),
+        );
+        return data;
+    }
+
+    async getESimFromOrderRef(reference: string): Promise<any> {
+        const { data } = await firstValueFrom(
+            this.httpService
+                .get(GET_ESIM_FROM_ORDER_REF, {
+                    headers: { ...ESIM_GO_API_HEADER },
+                    params: { reference },
                 })
                 .pipe(
                     catchError((error: AxiosError) => {

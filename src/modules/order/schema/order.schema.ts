@@ -3,6 +3,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, SchemaTypes } from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate';
 import { PaginateResponse } from 'src/common/paginate/dto/paginate.dto';
+import { ProviderName } from 'src/modules/provider/provider.constant';
 import { OrderStatus } from '../order.constant';
 import {
     OrderContactDocument,
@@ -72,6 +73,9 @@ export class Order {
         default: [],
     })
     fee?: OrderFeeDocument[];
+
+    @Prop({ type: () => ProviderName })
+    provider: ProviderName;
 
     @Prop({ type: SchemaTypes.String, required: false, default: null })
     refOrder?: string;
