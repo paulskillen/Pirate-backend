@@ -8,6 +8,7 @@ import { SoftDeleteModel } from 'mongoose-delete';
 import {
     OrderCreateInput,
     OrderPaginateInput,
+    OrderPaymentInput,
     OrderProcessInput,
     OrderUpdateInput,
 } from './dto/order.input';
@@ -17,6 +18,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { EVENT_ORDER } from './order.event';
 import { AppCacheServiceManager } from 'src/setting/cache/app-cache.service';
 import {
+    OrderPaymentStatus,
     OrderStatus,
     ORDER_CACHE_KEY,
     ORDER_CACHE_TTL,
@@ -28,9 +30,10 @@ import { AppHelper } from 'src/common/helper/app.helper';
 import {
     OrderContact,
     OrderCustomer,
+    OrderPayment,
     OrderProduct,
 } from './schema/sub/order.sub-schema';
-import { find, isEmpty, reduce } from 'lodash';
+import { find, isEmpty, map, reduce } from 'lodash';
 import { CustomerService } from '../customer/customer.service';
 import { ProviderBundleService } from '../provider-bundle/provider-bundle.service';
 import { Customer } from '../customer/schema/customer.schema';
@@ -41,6 +44,7 @@ import {
 import { ProviderName } from '../provider/provider.constant';
 import { ESimGoService } from '../provider/eSim-go/eSimGo.service';
 import { ESimGoOrderInput } from '../provider/eSim-go/dto/order/eSimGo-order.dto';
+import { EsimGoOrderStatus } from '../provider/eSim-go/eSimGo.constant';
 
 @Injectable()
 export class OrderService {
@@ -75,6 +79,7 @@ export class OrderService {
             id: ProviderName.ESIM_GO,
             service: this.eSimGoService,
             mapFunc: this.mapOrderDataToEsimGoOrderPayload,
+            verifyComplete: this.verifyCompleteOrderFromEsimGo,
         },
     ];
 
@@ -128,26 +133,10 @@ export class OrderService {
         };
     }
 
-    private async mapOrderDataToEsimGoOrderPayload(
-        orderData: Order,
-    ): Promise<ESimGoOrderInput> {
-        const esimGoOrder: ESimGoOrderInput['Order'] = [];
-        const { products } = orderData;
-        for (const product of products) {
-            const { id, name } = product?.product || {};
-            const proQty = product?.quantity ?? 1;
-            esimGoOrder.push({
-                type: 'bundle',
-                item: id || name,
-                quantity: proQty,
-            });
-        }
-
-        return {
-            type: 'transaction',
-            assign: true,
-            Order: esimGoOrder,
-        };
+    private async verifyCompleteOrderFromEsimGo(
+        orderData: any,
+    ): Promise<boolean> {
+        return orderData?.status === EsimGoOrderStatus.COMPLETED;
     }
 
     // ****************************** UTIL METHOD ********************************//
@@ -247,6 +236,48 @@ export class OrderService {
         Object.assign(saveData, { total, subTotal });
 
         return saveData;
+    }
+
+    private async mapOrderDataToEsimGoOrderPayload(
+        orderData: Order,
+    ): Promise<ESimGoOrderInput> {
+        const esimGoOrder: ESimGoOrderInput['Order'] = [];
+        const { products } = orderData;
+        for (const product of products) {
+            const { id, name } = product?.product || {};
+            const proQty = product?.quantity ?? 1;
+            esimGoOrder.push({
+                type: 'bundle',
+                item: id || name,
+                quantity: proQty,
+            });
+        }
+
+        return {
+            type: 'transaction',
+            assign: true,
+            Order: esimGoOrder,
+        };
+    }
+
+    private async mapPaymentInputToOrderPayment(
+        input: OrderPaymentInput[],
+        order: Order,
+    ): Promise<Array<OrderPayment>> {
+        const { orderNo } = order;
+        const mapped = map(input, (item, index) => {
+            const { paymentData, method, total } = item;
+            return {
+                status: OrderPaymentStatus.COMPLETED,
+                paymentNo: `${orderNo}_${index + 1}`,
+                method,
+                total,
+                paymentData,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
+        });
+        return mapped;
     }
 
     // ****************************** QUERY DATA ********************************//
@@ -390,48 +421,75 @@ export class OrderService {
             if (error) {
                 throw ErrorBadRequest(message);
             }
+            const payment = await this.mapPaymentInputToOrderPayment(
+                input?.payment,
+                foundOrder,
+            );
             const processing = await this.orderModel.findOneAndUpdate(
                 {
                     _id: new Types.ObjectId(orderId),
                 },
-                { $set: { status: OrderStatus.ORDER_PROCESSING } },
+                { $set: { status: OrderStatus.ORDER_PROCESSING, payment } },
                 { new: true },
             );
             if (processing) {
-                const foundProvider = find(
-                    this.providers,
-                    (i) =>
-                        i?.id === processing?.products?.[0]?.product?.provider,
-                );
-                const { service, mapFunc } = foundProvider || {};
-                if (service) {
-                    const createOrderPayload: any = await mapFunc(processing);
-                    if (!isEmpty(createOrderPayload)) {
-                        console.log(
-                            '🚀 >>>>>> file: order.service.ts:410 >>>>>> OrderService >>>>>> createOrderPayload:',
-                            createOrderPayload,
-                        );
-                        const providerOrder = await service.createOrder(
-                            createOrderPayload,
-                        );
-                        this.logger.log(
-                            '🚀 >>>>>> file: order.service.ts:415 >>>>>> OrderService >>>>>> providerOrder:',
-                            providerOrder,
-                        );
-                    } else {
-                        this.logger.error(
-                            'Can not map provider order payload !',
+                this.eventEmitter.emit(EVENT_ORDER.PROCESS, {
+                    payload: input,
+                    auth,
+                    data: processing,
+                });
+                await this.orderCache.set(processing);
+                return await this.complete(processing);
+            } else throw new Error();
+        } catch (error) {
+            throw new Error();
+        }
+    }
+
+    async complete(payload: Order, auth?: any): Promise<Order> {
+        try {
+            const foundProvider = find(
+                this.providers,
+                (i) => i?.id === payload?.products?.[0]?.product?.provider,
+            );
+            const { service, mapFunc, verifyComplete } = foundProvider || {};
+            let complete: any = null;
+            if (service) {
+                const createOrderPayload: any = await mapFunc(payload);
+                if (!isEmpty(createOrderPayload)) {
+                    const providerOrder = await service.createOrder(
+                        createOrderPayload,
+                    );
+                    this.logger.log(
+                        '🚀 >>>>>> file: order.service.ts:415 >>>>>> OrderService >>>>>> providerOrder:',
+                        providerOrder,
+                    );
+                    const isCompleted = await verifyComplete(providerOrder);
+                    if (isCompleted) {
+                        complete = await this.orderModel.findOneAndUpdate(
+                            {
+                                _id: payload?._id,
+                            },
+                            {
+                                $set: {
+                                    status: OrderStatus.COMPLETED,
+                                    providerOrder,
+                                },
+                            },
                         );
                     }
+                } else {
+                    this.logger.error('Can not map provider order payload !');
                 }
-
-                // this.eventEmitter.emit(EVENT_ORDER.UPDATE, {
-                //     payload: input,
-                //     auth,
-                //     data: processing,
-                // });
-                await this.orderCache.set(processing);
-                return processing;
+            }
+            if (complete) {
+                this.eventEmitter.emit(EVENT_ORDER.COMPLETE, {
+                    payload,
+                    auth,
+                    data: complete,
+                });
+                await this.orderCache.set(complete);
+                return complete;
             } else throw new Error();
         } catch (error) {
             throw new Error();

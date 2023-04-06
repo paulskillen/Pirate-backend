@@ -74,10 +74,10 @@ export class OrderPayment {
     paymentData?: any;
 
     @Prop({ type: SchemaTypes.Date, required: false, default: null })
-    createdAt: Date;
+    createdAt?: Date;
 
     @Prop({ type: SchemaTypes.Date, required: false, default: null })
-    updatedAt: Date;
+    updatedAt?: Date;
 }
 export const OrderPaymentSchema = SchemaFactory.createForClass(OrderProduct);
 export type OrderPaymentDocument = OrderPayment & Document;

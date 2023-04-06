@@ -60,9 +60,6 @@ export class Order {
     @Prop({ type: SchemaTypes.ObjectId })
     createByAdmin?: string;
 
-    @Prop({ type: SchemaTypes.Mixed, required: false, default: null })
-    providerOrder?: any;
-
     @Prop({ type: SchemaTypes.Number, required: true, default: 0 })
     subTotal: number;
 
@@ -75,6 +72,9 @@ export class Order {
         default: [],
     })
     fee?: OrderFeeDocument[];
+
+    @Prop({ type: SchemaTypes.Mixed, required: false, default: null })
+    providerOrder?: any;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
