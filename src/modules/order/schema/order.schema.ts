@@ -73,6 +73,9 @@ export class Order {
     })
     fee?: OrderFeeDocument[];
 
+    @Prop({ type: SchemaTypes.String, required: false, default: null })
+    refOrder?: string;
+
     @Prop({ type: SchemaTypes.Mixed, required: false, default: null })
     providerOrder?: any;
 }
