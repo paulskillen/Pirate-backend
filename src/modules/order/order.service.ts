@@ -80,6 +80,7 @@ export class OrderService {
             service: this.eSimGoService,
             mapFunc: this.mapOrderDataToEsimGoOrderPayload,
             verifyComplete: this.verifyCompleteOrderFromEsimGo,
+            getRefData: this.getRefDataFromEsimGoOrder,
         },
     ];
 
@@ -238,6 +239,26 @@ export class OrderService {
         return saveData;
     }
 
+    private async getOrderPaymentPayload(
+        input: OrderPaymentInput[],
+        order: Order,
+    ): Promise<Array<OrderPayment>> {
+        const { orderNo } = order;
+        const mapped = map(input, (item, index) => {
+            const { paymentData, method, total } = item;
+            return {
+                status: OrderPaymentStatus.COMPLETED,
+                paymentNo: `${orderNo}_${index + 1}`,
+                method,
+                total,
+                paymentData,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            };
+        });
+        return mapped;
+    }
+
     private async mapOrderDataToEsimGoOrderPayload(
         orderData: Order,
     ): Promise<ESimGoOrderInput> {
@@ -260,24 +281,10 @@ export class OrderService {
         };
     }
 
-    private async mapPaymentInputToOrderPayment(
-        input: OrderPaymentInput[],
-        order: Order,
-    ): Promise<Array<OrderPayment>> {
-        const { orderNo } = order;
-        const mapped = map(input, (item, index) => {
-            const { paymentData, method, total } = item;
-            return {
-                status: OrderPaymentStatus.COMPLETED,
-                paymentNo: `${orderNo}_${index + 1}`,
-                method,
-                total,
-                paymentData,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-            };
-        });
-        return mapped;
+    private async getRefDataFromEsimGoOrder(orderData: any): Promise<any> {
+        return {
+            refOrder: orderData?.orderReference ?? '',
+        };
     }
 
     // ****************************** QUERY DATA ********************************//
@@ -355,7 +362,7 @@ export class OrderService {
                 },
                 { new: true },
             );
-            return foundOrder;
+            return foundOrderUpdated;
         }
         const saveData: Partial<Order> = await this.getOrderSavingPayload(
             input,
@@ -421,7 +428,7 @@ export class OrderService {
             if (error) {
                 throw ErrorBadRequest(message);
             }
-            const payment = await this.mapPaymentInputToOrderPayment(
+            const payment = await this.getOrderPaymentPayload(
                 input?.payment,
                 foundOrder,
             );
@@ -452,7 +459,8 @@ export class OrderService {
                 this.providers,
                 (i) => i?.id === payload?.products?.[0]?.product?.provider,
             );
-            const { service, mapFunc, verifyComplete } = foundProvider || {};
+            const { service, mapFunc, verifyComplete, getRefData } =
+                foundProvider || {};
             let complete: any = null;
             if (service) {
                 const createOrderPayload: any = await mapFunc(payload);
@@ -465,6 +473,7 @@ export class OrderService {
                         providerOrder,
                     );
                     const isCompleted = await verifyComplete(providerOrder);
+                    const refData = await getRefData(providerOrder);
                     if (isCompleted) {
                         complete = await this.orderModel.findOneAndUpdate(
                             {
@@ -474,6 +483,7 @@ export class OrderService {
                                 $set: {
                                     status: OrderStatus.COMPLETED,
                                     providerOrder,
+                                    ...(refData || {}),
                                 },
                             },
                         );
