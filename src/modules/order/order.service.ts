@@ -30,6 +30,7 @@ import { AppHelper } from 'src/common/helper/app.helper';
 import {
     OrderContact,
     OrderCustomer,
+    OrderESimData,
     OrderPayment,
     OrderProduct,
 } from './schema/sub/order.sub-schema';
@@ -39,12 +40,14 @@ import { ProviderBundleService } from '../provider-bundle/provider-bundle.servic
 import { Customer } from '../customer/schema/customer.schema';
 import {
     ErrorBadRequest,
+    ErrorInternalException,
     ErrorNotFound,
 } from 'src/common/errors/errors.constant';
 import { ProviderName } from '../provider/provider.constant';
 import { ESimGoService } from '../provider/eSim-go/eSimGo.service';
 import { ESimGoOrderInput } from '../provider/eSim-go/dto/order/eSimGo-order.dto';
 import { EsimGoOrderStatus } from '../provider/eSim-go/eSimGo.constant';
+import { ESimGoEsimData } from '../provider/eSim-go/schema/order/eSimGo-order.schema';
 
 @Injectable()
 export class OrderService {
@@ -81,6 +84,7 @@ export class OrderService {
             mapFunc: this.mapOrderDataToEsimGoOrderPayload,
             verifyComplete: this.verifyCompleteOrderFromEsimGo,
             getRefData: this.getRefDataFromEsimGoOrder,
+            mapESimData: this.mapEsimGoESimToOrderESimPayload,
         },
     ];
 
@@ -283,6 +287,17 @@ export class OrderService {
         };
     }
 
+    private async mapEsimGoESimToOrderESimPayload(
+        eSimData: ESimGoEsimData,
+    ): Promise<OrderESimData> {
+        const { bundle, iccid, qrCode } = eSimData;
+        return {
+            eSimId: iccid,
+            qrCode,
+            eSimData,
+        };
+    }
+
     private async getRefDataFromEsimGoOrder(orderData: any): Promise<any> {
         return {
             refOrder: orderData?.orderReference ?? '',
@@ -312,7 +327,8 @@ export class OrderService {
     }
 
     async findById(id: string, auth?: any): Promise<Order> {
-        return await this.orderModel.findById(id).exec();
+        const data = await this.orderModel.findById(id).exec();
+        return data;
     }
 
     async findByIds(ids: string[], auth?: any): Promise<Order[] | undefined> {
@@ -459,7 +475,7 @@ export class OrderService {
         try {
             const foundProvider = find(
                 this.providers,
-                (i) => i?.id === payload?.products?.[0]?.product?.provider,
+                (i) => i?.id === payload?.provider,
             );
             const { service, mapFunc, verifyComplete, getRefData } =
                 foundProvider || {};
@@ -505,6 +521,51 @@ export class OrderService {
             } else throw new Error();
         } catch (error) {
             throw new Error();
+        }
+    }
+
+    async complete(payload: Order | string, auth?: any): Promise<Order> {
+        try {
+            const orderData =
+                typeof payload === 'string'
+                    ? await this.findById(payload)
+                    : payload;
+            if (!orderData) {
+                throw ErrorNotFound();
+            }
+            const foundProvider = find(
+                this.providers,
+                (i) => i?.id === orderData?.provider,
+            );
+            const { service, mapESimData } = foundProvider || {};
+            let completed: any = null;
+            let eSimProviderData: any = null;
+            if (service) {
+                eSimProviderData = await service.getESimDataForOrder(orderData);
+                const mappedESim = await mapESimData(eSimProviderData);
+                Object.assign(orderData, { eSimData: mappedESim });
+                completed = await this.orderModel.findOneAndUpdate(
+                    { _id: orderData?._id },
+                    {
+                        $set: {
+                            status: OrderStatus.COMPLETED,
+                            eSimData: mappedESim,
+                        },
+                    },
+                    { new: true },
+                );
+            }
+            if (completed) {
+                this.eventEmitter.emit(EVENT_ORDER.COMPLETE, {
+                    payload,
+                    auth,
+                    data: completed,
+                });
+                await this.orderCache.set(completed);
+                return completed;
+            } else throw ErrorNotFound();
+        } catch (error) {
+            throw ErrorInternalException(error);
         }
     }
 }

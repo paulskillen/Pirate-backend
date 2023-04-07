@@ -5,7 +5,16 @@ import * as mongoosePaginate from 'mongoose-paginate';
 import { PaginateResponse } from 'src/common/paginate/dto/paginate.dto';
 import { CustomerTitle, Gender } from '../customer.constant';
 
-@Schema({})
+@Schema({
+    timestamps: true,
+    toJSON: {
+        transform: (doc, ret, options) => {
+            ret.id = ret._id;
+            delete ret.__v;
+        },
+        virtuals: true,
+    },
+})
 export class BaseCustomer {
     _id: string;
 

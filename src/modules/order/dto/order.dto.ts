@@ -7,8 +7,10 @@ import {
     OrderStatus,
     OrderPaymentStatus,
     PaymentMethod,
+    OrderType,
 } from '../order.constant';
 import JSON from 'graphql-type-json';
+import { ProviderName } from 'src/modules/provider/provider.constant';
 
 @ObjectType()
 export class OrderProductDto {
@@ -42,29 +44,44 @@ export class OrderDto extends BaseDto {
     @Field(() => String)
     orderNo: string;
 
+    @Field(() => OrderType, { nullable: true })
+    orderType?: OrderType;
+
     @Field(() => OrderStatus)
     status: OrderStatus;
 
     @Field(() => CustomerBasicDto, { nullable: true })
     customer: CustomerBasicDto;
 
-    @Field(() => [OrderProductDto], { defaultValue: [] })
+    @Field(() => [OrderProductDto], { defaultValue: [], nullable: true })
     products: OrderProductDto[];
 
-    @Field(() => [OrderPaymentDto], { defaultValue: [] })
+    @Field(() => [OrderPaymentDto], { defaultValue: [], nullable: true })
     payment: OrderPaymentDto[];
 
     @Field(() => JSON, { nullable: true })
     expiryDate?: Date;
 
-    @Field({ nullable: true })
-    remark: string;
+    @Field(() => String, { nullable: true })
+    remark?: string;
 
     @Field(() => Float)
     total: number;
 
     @Field(() => Float)
     subTotal: number;
+
+    @Field(() => ProviderName)
+    provider: ProviderName;
+
+    @Field(() => String, { nullable: true })
+    refOrder?: string;
+
+    @Field(() => JSON, { nullable: true })
+    providerOrder?: any;
+
+    @Field(() => JSON, { nullable: true })
+    eSimData?: any;
 }
 
 @ObjectType()
@@ -78,7 +95,7 @@ export class OrderPaginateResponse {
     @Field(() => [OrderDto])
     data: OrderDto[];
 
-    @Field()
+    @Field(() => PaginateResponse, { nullable: true })
     pagination?: PaginateResponse;
 }
 

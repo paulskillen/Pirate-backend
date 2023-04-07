@@ -1,21 +1,39 @@
 import { CACHE_MANAGER, Inject, forwardRef } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Cache } from 'cache-manager';
+import { CustomerService } from 'src/modules/customer/customer.service';
 import {
     OrderCreateInput,
     OrderProcessInput,
 } from 'src/modules/order/dto/order.input';
+import { OrderResolver } from 'src/modules/order/order.resolver';
 import { OrderService } from 'src/modules/order/order.service';
-import { CustomerOrderDetailResponse } from './dto/customer-order.dto';
+import {
+    CustomerOrderDetailResponse,
+    CustomerOrderDto,
+} from './dto/customer-order.dto';
 
-@Resolver()
-export class CustomerOrderResolver {
+@Resolver(() => CustomerOrderDto)
+export class CustomerOrderResolver extends OrderResolver {
     constructor(
-        private orderService: OrderService,
-        @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    ) {}
+        @Inject(CACHE_MANAGER) readonly cacheManager: Cache,
+        readonly orderService: OrderService,
+        readonly customerService: CustomerService,
+    ) {
+        super(cacheManager, orderService, customerService);
+    }
 
     // ****************************** RESOLVER FIELD ********************************//
+
+    // ****************************** QUERY ********************************//
+
+    @Query(() => CustomerOrderDetailResponse)
+    async detailOrderForCustomer(@Args('id') id: string): Promise<any> {
+        const data = await this.orderService.findById(id);
+        return { data };
+    }
+
+    // ****************************** MUTATION ********************************//
 
     @Mutation(() => CustomerOrderDetailResponse)
     async createOrderForCustomer(
@@ -31,6 +49,14 @@ export class CustomerOrderResolver {
         @Args('input') input: OrderProcessInput,
     ): Promise<any> {
         const data = await this.orderService.process(orderId, input);
+        return { data };
+    }
+
+    @Mutation(() => CustomerOrderDetailResponse)
+    async completeOrderForCustomer(
+        @Args('orderId') orderId: string,
+    ): Promise<any> {
+        const data = await this.orderService.complete(orderId);
         return { data };
     }
 }

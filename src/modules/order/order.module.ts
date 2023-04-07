@@ -7,15 +7,16 @@ import { forwardRef } from '@nestjs/common';
 import { ProviderBundleModule } from '../provider-bundle/provider-bundle.module';
 import { CustomerModule } from '../customer/customer.module';
 import { ProviderModule } from '../provider/provider.module';
+import { OrderListener } from './listener/order.listener';
 
 @Module({
     imports: [
-        CustomerModule,
+        forwardRef(() => CustomerModule),
         ProviderModule,
         ProviderBundleModule,
         MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
     ],
-    providers: [OrderResolver, OrderService],
-    exports: [OrderService],
+    providers: [OrderResolver, OrderService, OrderListener],
+    exports: [OrderService, OrderResolver],
 })
 export class OrderModule {}

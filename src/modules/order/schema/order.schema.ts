@@ -4,7 +4,7 @@ import { Document, SchemaTypes } from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate';
 import { PaginateResponse } from 'src/common/paginate/dto/paginate.dto';
 import { ProviderName } from 'src/modules/provider/provider.constant';
-import { OrderStatus } from '../order.constant';
+import { OrderStatus, OrderType } from '../order.constant';
 import {
     OrderContactDocument,
     OrderCustomerSchema,
@@ -16,6 +16,8 @@ import {
     OrderPaymentDocument,
     OrderFeeSchema,
     OrderFeeDocument,
+    OrderESimDataDocument,
+    OrderESimDataSchema,
 } from './sub/order.sub-schema';
 
 @Schema({
@@ -34,6 +36,13 @@ export class Order {
     orderNo: string;
 
     @Prop({
+        type: () => OrderType,
+        required: false,
+        default: OrderType.BUY_NEW,
+    })
+    orderType?: OrderType;
+
+    @Prop({
         type: () => OrderStatus,
         required: true,
         default: OrderStatus.PENDING_PAYMENT,
@@ -46,8 +55,8 @@ export class Order {
     @Prop({ type: () => OrderContactSchema, required: false })
     contact?: OrderContactDocument;
 
-    @Prop({ type: () => [OrderProductSchema], required: true, default: [] })
-    products: OrderProductDocument[];
+    @Prop({ type: () => [OrderProductSchema], required: false, default: [] })
+    products?: OrderProductDocument[];
 
     @Prop({ type: () => OrderPaymentSchema, required: false, default: null })
     payment?: OrderPaymentDocument[];
@@ -82,6 +91,9 @@ export class Order {
 
     @Prop({ type: SchemaTypes.Mixed, required: false, default: null })
     providerOrder?: any;
+
+    @Prop({ type: OrderESimDataSchema, required: false, default: null })
+    eSimData?: OrderESimDataDocument;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

@@ -25,3 +25,12 @@ export class ESimGoOrder {
 
     price: number;
 }
+
+export class ESimGoEsimData {
+    iccid: string;
+    matchingId: string;
+    rspUrl: string;
+    bundle: string;
+    reference: string;
+    qrCode?: string;
+}

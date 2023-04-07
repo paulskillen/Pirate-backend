@@ -92,3 +92,17 @@ export class OrderFee {
 }
 export const OrderFeeSchema = SchemaFactory.createForClass(OrderFee);
 export type OrderFeeDocument = OrderFee & Document;
+
+@Schema({ _id: false, timestamps: false })
+export class OrderESimData {
+    @Prop({ type: SchemaTypes.Mixed, required: false })
+    qrCode: any;
+
+    @Prop({ type: SchemaTypes.String, required: false, default: 0 })
+    eSimId?: string;
+
+    @Prop({ type: SchemaTypes.Mixed, required: false, default: 0 })
+    eSimData?: any;
+}
+export const OrderESimDataSchema = SchemaFactory.createForClass(OrderESimData);
+export type OrderESimDataDocument = OrderESimData & Document;

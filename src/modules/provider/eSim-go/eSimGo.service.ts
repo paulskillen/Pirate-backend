@@ -20,16 +20,19 @@ import {
 } from './eSimGo.constant';
 import { AppHelper } from 'src/common/helper/app.helper';
 import {
-    GET_ESIM_FROM_ORDER_REF,
-    LIST_BUNDLES,
-    LIST_ESIM_ASSIGNED_TO_YOU,
-    PROCESS_ORDERS,
+    ESIM_GO_GET_ESIM_FROM_ORDER_REF,
+    ESIM_GO_GET_ESIM_QR_CODE_IMG,
+    ESIM_GO_LIST_BUNDLES,
+    ESIM_GO_LIST_ESIM_ASSIGNED_TO_YOU,
+    ESIM_GO_PROCESS_ORDERS,
 } from './apis/eSimGo.api';
 import { AxiosError } from 'axios';
 import { filter, find, includes, map } from 'lodash';
 import { ESimGoBundle } from './schema/bundle/eSimGo-bundle.schema';
 import { ESimGoOrderInput } from './dto/order/eSimGo-order.dto';
 import { ErrorInternalException } from 'src/common/errors/errors.constant';
+import { Order } from 'src/modules/order/schema/order.schema';
+import { ESimGoEsimData } from './schema/order/eSimGo-order.schema';
 
 @Injectable()
 export class ESimGoService implements OnModuleInit {
@@ -63,36 +66,100 @@ export class ESimGoService implements OnModuleInit {
     // ****************************** ESIM ********************************//
 
     async getListESimAssignedToYou(): Promise<any> {
-        const { data } = await firstValueFrom(
-            this.httpService
-                .get(LIST_ESIM_ASSIGNED_TO_YOU, {
-                    headers: { ...ESIM_GO_API_HEADER },
-                })
-                .pipe(
-                    catchError((error: AxiosError) => {
-                        this.logger.error(error.response.data);
-                        throw 'An error happened!';
-                    }),
-                ),
-        );
-        return data;
+        try {
+            const { data } = await firstValueFrom(
+                this.httpService
+                    .get(ESIM_GO_LIST_ESIM_ASSIGNED_TO_YOU, {
+                        headers: { ...ESIM_GO_API_HEADER },
+                    })
+                    .pipe(
+                        catchError((error: AxiosError) => {
+                            this.logger.error(error.response.data);
+                            throw 'An error happened!';
+                        }),
+                    ),
+            );
+
+            return data;
+        } catch (error) {
+            this.logger.error('getListESimAssignedToYou Error', {
+                error,
+            });
+        }
     }
 
-    async getESimFromOrderRef(reference: string): Promise<any> {
-        const { data } = await firstValueFrom(
-            this.httpService
-                .get(GET_ESIM_FROM_ORDER_REF, {
-                    headers: { ...ESIM_GO_API_HEADER },
-                    params: { reference },
-                })
-                .pipe(
-                    catchError((error: AxiosError) => {
-                        this.logger.error(error.response.data);
-                        throw 'An error happened!';
-                    }),
-                ),
-        );
-        return data;
+    async getESimDataFromOrderRef(
+        reference: string,
+    ): Promise<ESimGoEsimData[]> {
+        try {
+            const { data } = await firstValueFrom(
+                this.httpService
+                    .get(ESIM_GO_GET_ESIM_FROM_ORDER_REF, {
+                        headers: {
+                            ...ESIM_GO_API_HEADER,
+                            Accept: 'application/json',
+                        },
+                        params: { reference },
+                    })
+                    .pipe(
+                        catchError((error: AxiosError) => {
+                            this.logger.error(error.response.data);
+                            throw 'An error happened!';
+                        }),
+                    ),
+            );
+            this.logger.log(
+                '🚀 >>>>>> file: eSimGo.service.ts:87 >>>>>> ESimGoService >>>>>> getESimDataFromOrderRef >>>>>> data:',
+                data,
+            );
+            return data;
+        } catch (error) {
+            this.logger.error('getESimDataFromOrderRef Error', {
+                error,
+            });
+        }
+    }
+
+    async getESimQrCodeImgFromESimCode(code: string): Promise<any> {
+        try {
+            const { data } = await firstValueFrom(
+                this.httpService
+                    .get(ESIM_GO_GET_ESIM_QR_CODE_IMG(code), {
+                        headers: {
+                            ...ESIM_GO_API_HEADER,
+                            Accept: 'application/json',
+                        },
+                    })
+                    .pipe(
+                        catchError((error: AxiosError) => {
+                            this.logger.error(error.response.data);
+                            throw 'An error happened!';
+                        }),
+                    ),
+            );
+            this.logger.log(
+                '🚀 >>>>>> file: eSimGo.service.ts:111 >>>>>> ESimGoService >>>>>> getESimQrCodeImgFromESimCode >>>>>> data:',
+                data,
+            );
+            this.logger.log(
+                '🚀 >>>>>> file: eSimGo.service.ts:111 >>>>>> ESimGoService >>>>>> getESimQrCodeImgFromESimCode >>>>>> data:',
+                JSON.stringify(data),
+            );
+            return data;
+        } catch (error) {
+            this.logger.error('getESimQrCodeImgFromESimCode Error', {
+                error,
+            });
+        }
+    }
+
+    async getESimDataForOrder(orderData: Order): Promise<ESimGoEsimData> {
+        const { refOrder } = orderData;
+        const esims = await this.getESimDataFromOrderRef(refOrder);
+        const esimData = esims?.[0];
+        const { iccid } = esimData ?? {};
+        const qrCode = await this.getESimQrCodeImgFromESimCode(iccid);
+        return { ...esimData, qrCode };
     }
 
     // ****************************** BUNDLES ********************************//
@@ -114,7 +181,7 @@ export class ESimGoService implements OnModuleInit {
                 page++;
                 const { data } = await firstValueFrom(
                     this.httpService
-                        .get(LIST_BUNDLES, {
+                        .get(ESIM_GO_LIST_BUNDLES, {
                             headers: { ...ESIM_GO_API_HEADER },
                             params: { perPage: 100, page },
                         })
@@ -170,7 +237,7 @@ export class ESimGoService implements OnModuleInit {
         try {
             const { data } = await firstValueFrom(
                 this.httpService
-                    .post(PROCESS_ORDERS, payload, {
+                    .post(ESIM_GO_PROCESS_ORDERS, payload, {
                         headers: { ...ESIM_GO_API_HEADER },
                     })
                     .pipe(

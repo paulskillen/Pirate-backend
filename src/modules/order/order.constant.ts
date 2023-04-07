@@ -37,3 +37,11 @@ export enum PaymentMethod {
 registerEnumType(PaymentMethod, {
     name: 'PaymentMethod',
 });
+
+export enum OrderType {
+    TOP_UP = 'TOP_UP',
+    BUY_NEW = 'BUY_NEW',
+}
+registerEnumType(OrderType, {
+    name: 'OrderType',
+});
