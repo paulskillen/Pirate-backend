@@ -504,6 +504,9 @@ export class OrderService {
                                     ...(refData || {}),
                                 },
                             },
+                            {
+                                new: true,
+                            },
                         );
                     }
                 } else {
