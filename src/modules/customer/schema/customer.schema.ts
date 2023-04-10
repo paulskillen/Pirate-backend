@@ -3,7 +3,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, SchemaTypes } from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate';
 import { PaginateResponse } from 'src/common/paginate/dto/paginate.dto';
-import { CustomerTitle, Gender } from '../customer.constant';
+import { CustomerStatus, CustomerTitle, Gender } from '../customer.constant';
 
 @Schema({
     timestamps: true,
@@ -24,8 +24,18 @@ export class BaseCustomer {
     @Prop({ type: SchemaTypes.String, required: true, unique: true })
     customerNo: string;
 
+    @Prop({
+        type: () => CustomerStatus,
+        required: true,
+        default: CustomerStatus.ACTIVE,
+    })
+    status?: CustomerStatus;
+
     @Prop()
     avatar?: string;
+
+    @Prop()
+    socialId?: string;
 
     @Prop({
         type: () => CustomerTitle,

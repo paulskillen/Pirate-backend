@@ -7,7 +7,10 @@ import * as moment from 'moment';
 import { PaginateModel } from 'mongoose';
 import { SoftDeleteModel } from 'mongoose-delete';
 import { AppCacheServiceManager } from 'src/setting/cache/app-cache.service';
-import { ErrorNotFound } from 'src/common/errors/errors.constant';
+import {
+    ErrorInternalException,
+    ErrorNotFound,
+} from 'src/common/errors/errors.constant';
 import {
     CUSTOMER_PREFIX_CODE,
     CUSTOMER_CACHE_KEY,
@@ -15,7 +18,7 @@ import {
 } from './customer.constant';
 import { EVENT_CUSTOMER } from './customer.event';
 import { CustomerGetter } from './customer.getter';
-import { CustomerCreateRequest } from './dto/customer.input';
+import { CustomerCreateInput } from './dto/customer.input';
 import {
     BaseCustomer,
     Customer,
@@ -114,9 +117,32 @@ export class CustomerService {
         return this.customerModel.findOne({ _id: id }).exec();
     }
 
+    async login(username: string): Promise<Customer> {
+        return this.customerModel
+            .findOneAndUpdate(
+                { $or: [{ email: username }] },
+                { $set: { lastLogin: new Date() } },
+                { new: true },
+            )
+            .exec();
+    }
+
+    async socialLogin(socialId: string): Promise<Customer> {
+        if (!socialId) {
+            throw ErrorInternalException('[socialId]: can not be null');
+        }
+        return this.customerModel
+            .findOneAndUpdate(
+                { socialId },
+                { $set: { lastLogin: new Date() } },
+                { new: true },
+            )
+            .exec();
+    }
+
     // ****************************** MUTATE DATA ********************************//
 
-    async create(input: CustomerCreateRequest, auth: any): Promise<Customer> {
+    async create(input: CustomerCreateInput, auth?: any): Promise<Customer> {
         const customerNo = await this.getNextNo();
         if (!customerNo) {
             throw Error('Something went wrong! Can not create Customer No !');

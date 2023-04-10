@@ -23,3 +23,19 @@ export enum CustomerTitle {
 registerEnumType(CustomerTitle, {
     name: 'CustomerTitle',
 });
+
+export enum CustomerStatus {
+    ACTIVE = 'ACTIVE',
+    IN_ACTIVE = 'IN_ACTIVE',
+}
+registerEnumType(CustomerStatus, {
+    name: 'CustomerStatus',
+});
+
+export enum CustomerVerifiedStatus {
+    VERIFIED = 'VERIFIED',
+    UN_VERIFIED = 'UN_VERIFIED',
+}
+registerEnumType(CustomerVerifiedStatus, {
+    name: 'CustomerVerifiedStatus',
+});
