@@ -11,9 +11,12 @@ export class AppCacheServiceManager {
     private getKeyFromData = (data: any) =>
         `${this.cacheKey}${data?.id?.toString?.()}`;
 
-    async get(key: string): Promise<any> {
+    async get(dataKey: string): Promise<any> {
         try {
-            const data = await this.cacheManager.get(key);
+            const data =
+                typeof dataKey === 'string'
+                    ? await this.cacheManager.get(dataKey)
+                    : await this.cacheManager.get(this.getKeyFromData(dataKey));
             return data;
         } catch (error) {
             console.error({ error });

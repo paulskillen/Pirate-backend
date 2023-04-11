@@ -1,9 +1,9 @@
 import { CacheModule, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { JWT_SECRET } from './customer-auth.constant';
-import { AuthService } from './customer-auth.service';
+import { CustomerAuthService } from './customer-auth.service';
 import { PassportModule } from '@nestjs/passport';
-import { AuthResolver } from './customer-auth.resolver';
+import { CustomerAuthResolver } from './customer-auth.resolver';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { CustomerModule } from 'src/modules/customer/customer.module';
 
@@ -17,7 +17,7 @@ import { CustomerModule } from 'src/modules/customer/customer.module';
         }),
         CustomerModule,
     ],
-    providers: [AuthService, JwtStrategy, AuthResolver],
-    exports: [AuthService],
+    providers: [CustomerAuthService, JwtStrategy, CustomerAuthResolver],
+    exports: [CustomerAuthService],
 })
-export class AuthModule {}
+export class CustomerAuthModule {}

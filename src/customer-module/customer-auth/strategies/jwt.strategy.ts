@@ -2,8 +2,13 @@ import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Cache } from 'cache-manager';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import {
+    CUSTOMER_CACHE_KEY,
+    CUSTOMER_CACHE_TTL,
+} from 'src/modules/customer/customer.constant';
 import { CustomerService } from 'src/modules/customer/customer.service';
 import { Customer } from 'src/modules/customer/schema/customer.schema';
+import { AppCacheServiceManager } from 'src/setting/cache/app-cache.service';
 import { JWT_SECRET } from '../customer-auth.constant';
 
 @Injectable()
@@ -19,9 +24,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         });
     }
 
+    customerCache = new AppCacheServiceManager(
+        this.cacheManager,
+        CUSTOMER_CACHE_KEY,
+        CUSTOMER_CACHE_TTL,
+    );
+
     async validate(validationPayload) {
-        const authCache: string = await this.cacheManager.get(
-            `{customer}:${validationPayload.id}`,
+        const authCache: string = await this.customerCache.get(
+            validationPayload,
         );
 
         let currentAuth: Customer;
@@ -30,13 +41,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
                 validationPayload.id,
             );
 
-            await this.cacheManager.set(
-                `{customer}:${validationPayload.id}`,
-                JSON.stringify(currentAuth),
-                {
-                    ttl: 6000,
-                },
-            );
+            await this.customerCache.set(currentAuth);
         } else {
             currentAuth = JSON.parse(authCache);
         }

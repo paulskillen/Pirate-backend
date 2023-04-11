@@ -4,7 +4,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { AuthenticationError } from 'apollo-server-express';
 
 @Injectable()
-export class GqlAuthGuard extends AuthGuard('jwt') {
+export class CustomerAuthGuard extends AuthGuard('jwt') {
     getRequest(context: ExecutionContext): any {
         const ctx = GqlExecutionContext.create(context);
         const token = ctx.getContext().req.headers.authorization;

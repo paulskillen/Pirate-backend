@@ -15,7 +15,7 @@ export type AuthPayload = {
 };
 
 @Injectable()
-export class AuthService {
+export class CustomerAuthService {
     constructor(
         private readonly customerService: CustomerService,
         private readonly jwtService: JwtService,

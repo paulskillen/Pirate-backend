@@ -6,25 +6,25 @@ import AppleAuth from 'src/modules/third-party/apple.auth';
 import FacebookAuth from 'src/modules/third-party/facebook.auth';
 import GoogleAuth from 'src/modules/third-party/google.auth';
 import { SocialProvider } from './customer-auth.constant';
-import { AuthService } from './customer-auth.service';
+import { CustomerAuthService } from './customer-auth.service';
 import {
     LoginResponseDto,
     LoginSocialResponseDto,
 } from './dto/customer-auth.dto';
 
 @Resolver()
-export class AuthResolver {
+export class CustomerAuthResolver {
     constructor(
-        private authService: AuthService,
+        private customerAuthService: CustomerAuthService,
         private customerService: CustomerService,
         private jwtService: JwtService,
     ) {}
 
-    @Mutation()
+    @Mutation(() => LoginResponseDto)
     async login(@Args() args: any): Promise<LoginResponseDto> {
         try {
             const { username, password } = args;
-            const loginResponse = await this.authService.login(
+            const loginResponse = await this.customerAuthService.login(
                 username,
                 password,
             );
@@ -34,19 +34,19 @@ export class AuthResolver {
         }
     }
 
-    @Mutation()
+    @Mutation(() => LoginResponseDto)
     async register(
         @Args('input') input: CustomerRegisterInput,
     ): Promise<LoginResponseDto> {
         try {
-            const registerRes = await this.authService.register(input);
+            const registerRes = await this.customerAuthService.register(input);
             return { ...registerRes, otpToken: registerRes.token };
         } catch (error) {
             throw error;
         }
     }
 
-    @Mutation()
+    @Mutation(() => LoginSocialResponseDto)
     async loginSocial(
         @Args('provider') provider: SocialProvider,
         @Args('token') token: string,
@@ -69,7 +69,7 @@ export class AuthResolver {
                 default:
                     break;
             }
-            const loginResponse = await this.authService.loginSocial(
+            const loginResponse = await this.customerAuthService.loginSocial(
                 userProfile,
             );
             return loginResponse;
