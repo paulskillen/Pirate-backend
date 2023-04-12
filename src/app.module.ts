@@ -1,9 +1,6 @@
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { CacheModule, Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { GraphQLModule } from '@nestjs/graphql';
-import { join } from 'lodash';
 import { CustomerModuleModules } from './customer-module/customer-module.module';
 import { MongoModule } from './setting/database/mongo.module';
 import { GraphQlModule } from './setting/graphql/graphql.module';
