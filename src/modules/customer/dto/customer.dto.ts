@@ -27,6 +27,9 @@ export class CustomerDto extends BaseDto {
     @Field({ nullable: true })
     nickname: string;
 
+    @Field({ nullable: true })
+    socialId: string;
+
     @Field(() => Gender, { nullable: true })
     gender: Gender;
 

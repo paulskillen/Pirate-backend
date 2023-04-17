@@ -18,6 +18,9 @@ export class LoginSocialResponseDto {
     @Field({ nullable: true })
     accessToken?: string;
 
+    @Field({ nullable: true })
+    isRegistered?: boolean;
+
     @Field(() => CustomerDto, { nullable: true })
     profile?: CustomerDto;
 }
