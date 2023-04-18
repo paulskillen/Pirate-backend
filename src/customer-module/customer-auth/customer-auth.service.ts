@@ -115,8 +115,6 @@ export class CustomerAuthService {
                 phone: input.phone,
                 password: input.password,
                 status: CustomerStatus.ACTIVE,
-                billing: [],
-                address: [],
                 isVerified: false,
                 email: input.email,
                 socialId: input.socialId,
