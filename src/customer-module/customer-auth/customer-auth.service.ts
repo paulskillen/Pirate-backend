@@ -106,17 +106,15 @@ export class CustomerAuthService {
 
     async register(input: CustomerRegisterInput): Promise<any | null> {
         try {
-            if (input.email) {
-            }
-
             const newCustomer = {
+                status: CustomerStatus.ACTIVE,
+                title: input.title,
                 firstName: input.firstName,
                 lastName: input.lastName,
-                phone: input.phone,
                 password: input.password,
-                status: CustomerStatus.ACTIVE,
-                isVerified: false,
                 email: input.email,
+                phone: input?.phone,
+                phoneCode: input.phoneCode,
                 socialId: input.socialId,
                 avatar:
                     input?.avatar ??
@@ -125,7 +123,7 @@ export class CustomerAuthService {
             const customer = await this.customerService.create(
                 newCustomer as any,
             );
-            return { data: customer };
+            return customer;
         } catch (error) {
             throw error;
         }

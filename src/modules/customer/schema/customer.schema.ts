@@ -95,12 +95,21 @@ export class Customer extends BaseCustomer {
 
     @Prop()
     facebook?: string;
+
+    @Prop({ type: SchemaTypes.String, required: false })
+    password?: string;
 }
 
 const CustomerSchema = SchemaFactory.createForClass(Customer);
 
 CustomerSchema.index({ customerNo: -1 });
-CustomerSchema.index({ email: 'text', phone: 'text' });
+CustomerSchema.index({
+    email: 'text',
+    phone: 'text',
+    firstName: 'text',
+    lastName: 'text',
+    nickname: 'text',
+});
 
 export { CustomerSchema };
 

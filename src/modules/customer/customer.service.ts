@@ -25,6 +25,7 @@ import {
     CustomerDocument,
 } from './schema/customer.schema';
 import { AppHelper } from 'src/common/helper/app.helper';
+import { PasswordHelper } from 'src/common/helper/password.helper';
 
 @Injectable()
 export class CustomerService {
@@ -51,7 +52,7 @@ export class CustomerService {
     // ****************************** UTIL METHOD ********************************//
 
     private async getNextNo(): Promise<string> {
-        const lastBooking = await this.customerModel
+        const lastData = await this.customerModel
             .findOne(
                 {
                     bookingNo: { $regex: CUSTOMER_PREFIX_CODE },
@@ -62,11 +63,10 @@ export class CustomerService {
             .limit(1)
             .lean();
         const dateTime = moment().format('YYMMDD');
-        const lastBookingNo =
-            lastBooking?.customerNo ??
-            `${CUSTOMER_PREFIX_CODE}${dateTime}00000`;
+        const lastDataNo =
+            lastData?.customerNo ?? `${CUSTOMER_PREFIX_CODE}${dateTime}00000`;
         const newId = AppHelper.generateIdWithCode(
-            lastBookingNo,
+            lastDataNo,
             CUSTOMER_PREFIX_CODE,
             dateTime,
         );
@@ -150,6 +150,7 @@ export class CustomerService {
         const saveData: Partial<Customer> = {
             ...input,
             customerNo,
+            password: await PasswordHelper.hash(input.password),
         } as unknown as Customer;
         // if (auth?._id) {
         //   Object.assign(saveData, { createByAdmin: auth._id });

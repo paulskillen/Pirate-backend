@@ -42,7 +42,7 @@ export class CustomerAuthResolver {
     ): Promise<LoginResponseDto> {
         try {
             const registerRes = await this.customerAuthService.register(input);
-            return registerRes;
+            return { profile: registerRes, accessToken: null };
         } catch (error) {
             throw error;
         }
