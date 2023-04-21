@@ -6,6 +6,7 @@ import {
     OrderCreateInput,
     OrderProcessInput,
 } from 'src/modules/order/dto/order.input';
+import { OrderStatus } from 'src/modules/order/order.constant';
 import { OrderResolver } from 'src/modules/order/order.resolver';
 import { OrderService } from 'src/modules/order/order.service';
 import {
@@ -40,7 +41,12 @@ export class CustomerOrderResolver extends OrderResolver {
         const data = await this.orderService.getAllByCondition(
             undefined,
             undefined,
-            { 'customer._id': customer?._id },
+            {
+                'customer._id': customer?._id,
+                status: {
+                    $in: [OrderStatus.COMPLETED, OrderStatus.ORDER_PROCESSING],
+                },
+            },
         );
         return { data };
     }

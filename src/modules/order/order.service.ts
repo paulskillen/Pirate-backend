@@ -340,14 +340,16 @@ export class OrderService {
         auth?: any,
         otherQuery?: any,
     ): Promise<Order[]> {
-        const query = OrderHelper.getFilterOrderQuery({
-            paginateInput,
-            previous: {},
-        });
+        const query = paginateInput
+            ? OrderHelper.getFilterOrderQuery({
+                  paginateInput,
+                  previous: {},
+              })
+            : {};
         if (otherQuery) {
             Object.assign(query, otherQuery);
         }
-        return await this.orderModel.find(query);
+        return await this.orderModel.find(query).sort({ _id: -1 });
     }
 
     // ****************************** MUTATE DATA ********************************//

@@ -20,7 +20,7 @@ export class CustomerOrderPaginateResponse {
     @Field(() => [CustomerOrderDto])
     data: CustomerOrderDto[];
 
-    @Field()
+    @Field({ nullable: true })
     pagination?: PaginateResponse;
 }
 
