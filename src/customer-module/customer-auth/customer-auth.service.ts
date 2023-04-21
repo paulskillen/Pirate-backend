@@ -92,7 +92,7 @@ export class CustomerAuthService {
             //     };
             // }
 
-            const accessToken = await this.getJwtAccessToken(customer?.id);
+            const accessToken = await this.getJwtAccessToken(customer?._id);
             return {
                 isRegistered: true,
                 isVerified: true,

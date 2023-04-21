@@ -20,7 +20,7 @@ export class CustomerAuthGuard extends AuthGuard('jwt') {
 
     handleRequest(err, currentAuth, info) {
         // You can throw an exception based on either "info" or "err" arguments
-        if (err || !currentAuth || !currentAuth?.id) {
+        if (err || !currentAuth || !currentAuth?._id) {
             throw (
                 err ||
                 new AuthenticationError(
