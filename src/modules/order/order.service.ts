@@ -336,7 +336,7 @@ export class OrderService {
     }
 
     async getAllByCondition(
-        paginateInput: OrderPaginateInput,
+        paginateInput?: OrderPaginateInput,
         auth?: any,
         otherQuery?: any,
     ): Promise<Order[]> {

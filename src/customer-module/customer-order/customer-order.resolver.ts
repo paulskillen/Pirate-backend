@@ -9,8 +9,13 @@ import {
 import { OrderResolver } from 'src/modules/order/order.resolver';
 import { OrderService } from 'src/modules/order/order.service';
 import {
+    CurrentCustomer,
+    CustomerAuthorization,
+} from '../customer-auth/decorators/customer-auth.decorator';
+import {
     CustomerOrderDetailResponse,
     CustomerOrderDto,
+    CustomerOrderPaginateResponse,
 } from './dto/customer-order.dto';
 
 @Resolver(() => CustomerOrderDto)
@@ -27,6 +32,20 @@ export class CustomerOrderResolver extends OrderResolver {
 
     // ****************************** QUERY ********************************//
 
+    @CustomerAuthorization()
+    @Query(() => CustomerOrderPaginateResponse)
+    async historyOrderForCustomer(
+        @CurrentCustomer() customer: any,
+    ): Promise<any> {
+        const data = await this.orderService.getAllByCondition(
+            undefined,
+            undefined,
+            { 'customer._id': customer?._id },
+        );
+        return { data };
+    }
+
+    @CustomerAuthorization()
     @Query(() => CustomerOrderDetailResponse)
     async detailOrderForCustomer(@Args('id') id: string): Promise<any> {
         const data = await this.orderService.findById(id);
@@ -35,6 +54,7 @@ export class CustomerOrderResolver extends OrderResolver {
 
     // ****************************** MUTATION ********************************//
 
+    @CustomerAuthorization()
     @Mutation(() => CustomerOrderDetailResponse)
     async createOrderForCustomer(
         @Args('input') input: OrderCreateInput,
@@ -43,6 +63,7 @@ export class CustomerOrderResolver extends OrderResolver {
         return { data };
     }
 
+    @CustomerAuthorization()
     @Mutation(() => CustomerOrderDetailResponse)
     async processOrderForCustomer(
         @Args('orderId') orderId: string,
@@ -52,6 +73,7 @@ export class CustomerOrderResolver extends OrderResolver {
         return { data };
     }
 
+    @CustomerAuthorization()
     @Mutation(() => CustomerOrderDetailResponse)
     async completeOrderForCustomer(
         @Args('orderId') orderId: string,
