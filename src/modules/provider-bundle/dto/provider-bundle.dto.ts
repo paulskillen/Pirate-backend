@@ -25,6 +25,9 @@ export class ProviderBundleDto extends BaseDto {
     price: any;
 
     @Field(() => JSON, { nullable: true })
+    salePrice?: any;
+
+    @Field(() => JSON, { nullable: true })
     bundleData?: any;
 }
 

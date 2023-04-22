@@ -49,7 +49,7 @@ export class Order {
     })
     status: OrderStatus;
 
-    @Prop({ type: () => OrderCustomerSchema, required: true })
+    @Prop({ type: () => OrderCustomerSchema, required: false })
     customer: OrderCustomerDocument;
 
     @Prop({ type: () => OrderContactSchema, required: false })

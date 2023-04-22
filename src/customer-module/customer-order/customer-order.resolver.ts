@@ -60,7 +60,6 @@ export class CustomerOrderResolver extends OrderResolver {
 
     // ****************************** MUTATION ********************************//
 
-    @CustomerAuthorization()
     @Mutation(() => CustomerOrderDetailResponse)
     async createOrderForCustomer(
         @Args('input') input: OrderCreateInput,
@@ -69,7 +68,6 @@ export class CustomerOrderResolver extends OrderResolver {
         return { data };
     }
 
-    @CustomerAuthorization()
     @Mutation(() => CustomerOrderDetailResponse)
     async processOrderForCustomer(
         @Args('orderId') orderId: string,
@@ -79,7 +77,6 @@ export class CustomerOrderResolver extends OrderResolver {
         return { data };
     }
 
-    @CustomerAuthorization()
     @Mutation(() => CustomerOrderDetailResponse)
     async completeOrderForCustomer(
         @Args('orderId') orderId: string,

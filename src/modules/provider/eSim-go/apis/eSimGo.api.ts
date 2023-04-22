@@ -1,4 +1,4 @@
-import { ESIM_GO_API_URL } from '../eSimGo.constant';
+import { ESIM_GO_API_URL, ESIM_GO_API_URL_VERSION_1 } from '../eSimGo.constant';
 
 // ****************************** ESIMS ********************************//
 

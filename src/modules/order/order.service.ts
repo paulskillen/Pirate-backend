@@ -110,7 +110,11 @@ export class OrderService {
                 message: `Order #${orderId} with status ${status} is not valid to process!`,
             };
         }
-        if (customer !== orderCustomer?._id?.toString?.()) {
+        if (
+            orderCustomer &&
+            orderCustomer?._id &&
+            orderCustomer?._id?.toString?.() == !customer
+        ) {
             return {
                 error: true,
                 message: `Customer in payment  is not match order customer !`,
@@ -304,6 +308,42 @@ export class OrderService {
         };
     }
 
+    private async checkExistingOrder(
+        input: OrderCreateInput,
+        auth?: any,
+    ): Promise<Order | null> {
+        const { customer, products } = input || {};
+        const exist = await this.orderModel.find(
+            {
+                status: { $in: [OrderStatus.PENDING_PAYMENT] },
+                'customer._id': new Types.ObjectId(customer),
+                'products.product.id': products?.[0]?.id,
+                payment: null,
+                expiryDate: { $gt: new Date() },
+            },
+            null,
+            { sort: { _id: -1 } },
+        );
+        if (exist && exist?.length > 0) {
+            const foundOrder = exist?.[0];
+            const foundOrderUpdated = await this.orderModel.findOneAndUpdate(
+                {
+                    _id: foundOrder?._id,
+                },
+                {
+                    $set: {
+                        expiryDate: moment()
+                            .add(ORDER_EXPIRY_DAYS, 'day')
+                            .toDate(),
+                    },
+                },
+                { new: true },
+            );
+            return foundOrderUpdated;
+        }
+        return null;
+    }
+
     // ****************************** QUERY DATA ********************************//
 
     async findAll(
@@ -356,33 +396,11 @@ export class OrderService {
 
     async create(input: OrderCreateInput, auth?: any): Promise<Order> {
         const { customer, products } = input || {};
-        const exist = await this.orderModel.find(
-            {
-                status: { $in: [OrderStatus.PENDING_PAYMENT] },
-                'customer._id': customer,
-                'products.product.id': products?.[0]?.id,
-                payment: null,
-                expiryDate: { $gt: new Date() },
-            },
-            null,
-            { sort: { _id: -1 } },
-        );
-        if (exist && exist?.length > 0) {
-            const foundOrder = exist?.[0];
-            const foundOrderUpdated = await this.orderModel.findOneAndUpdate(
-                {
-                    _id: foundOrder?._id,
-                },
-                {
-                    $set: {
-                        expiryDate: moment()
-                            .add(ORDER_EXPIRY_DAYS, 'day')
-                            .toDate(),
-                    },
-                },
-                { new: true },
-            );
-            return foundOrderUpdated;
+        if (customer) {
+            const processExisting = await this.checkExistingOrder(input);
+            if (processExisting) {
+                return processExisting;
+            }
         }
         const saveData: Partial<Order> = await this.getOrderSavingPayload(
             input,
