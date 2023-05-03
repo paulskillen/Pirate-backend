@@ -127,9 +127,8 @@ export class ESimGoService implements OnModuleInit {
                     .get(ESIM_GO_GET_ESIM_QR_CODE_IMG(code), {
                         headers: {
                             ...ESIM_GO_API_HEADER,
-                            Accept: 'application/json',
-                            'Content-Type': 'application/json',
                         },
+                        responseType: 'arraybuffer',
                     })
                     .pipe(
                         catchError((error: AxiosError) => {
@@ -140,16 +139,10 @@ export class ESimGoService implements OnModuleInit {
             );
 
             const { data } = res || {};
-            this.logger.log(
-                '🚀 >>>>>> file: eSimGo.service.ts:111 >>>>>> ESimGoService >>>>>> getESimQrCodeImgFromESimCode >>>>>> data:',
-                data,
-            );
-            this.logger.log(
-                '🚀 >>>>>> file: eSimGo.service.ts:111 >>>>>> ESimGoService >>>>>> getESimQrCodeImgFromESimCode >>>>>> data:',
-                JSON.stringify(data),
-            );
+            const u8 = new Uint8Array(data);
+            const b64encoded = btoa(String.fromCharCode.apply(null, u8 as any));
             const base64Data = Buffer.from(data).toString('base64');
-            return data;
+            return b64encoded;
         } catch (error) {
             this.logger.error('getESimQrCodeImgFromESimCode Error', {
                 error,
