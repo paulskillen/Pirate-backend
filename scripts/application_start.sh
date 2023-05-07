@@ -1,10 +1,10 @@
 #!/bin/bash
 
 #give permission for everything in the express-app directory
-sudo chmod -R 777 /home/pirate-mobile
+sudo chmod -R 777 /home/pirate-mobile/pirate-mobile-be
 
 #navigate into our working directory where we have all our github files
-cd /home/pirate-mobile
+cd /home/pirate-mobile/pirate-mobile-be
 
 #add npm and node to path
 export NVM_DIR="$HOME/.nvm"	
