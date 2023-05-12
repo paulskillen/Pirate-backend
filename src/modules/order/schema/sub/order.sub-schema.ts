@@ -95,7 +95,7 @@ export type OrderFeeDocument = OrderFee & Document;
 
 @Schema({ _id: false, timestamps: false })
 export class OrderESimData {
-    @Prop({ type: SchemaTypes.Mixed, required: false })
+    @Prop({ type: SchemaTypes.Buffer, required: false })
     qrCode: any;
 
     @Prop({ type: SchemaTypes.String, required: false, default: 0 })

@@ -6,6 +6,7 @@ import { ProviderBundleDto } from './dto/provider-bundle.dto';
 import { ProviderBundleService } from './provider-bundle.service';
 import { ProviderBundle } from './schema/provider-bundle.schema';
 import JSON from 'graphql-type-json';
+import { priceSaleFormula } from 'src/common/constant/app.constant';
 
 @Resolver(() => ProviderBundleDto)
 export class ProviderBundleDtoResolver {
@@ -25,6 +26,6 @@ export class ProviderBundleDtoResolver {
         if (!price) {
             return null;
         }
-        return price;
+        return priceSaleFormula(price);
     }
 }

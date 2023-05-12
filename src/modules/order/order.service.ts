@@ -48,6 +48,7 @@ import { ESimGoService } from '../provider/eSim-go/eSimGo.service';
 import { ESimGoOrderInput } from '../provider/eSim-go/dto/order/eSimGo-order.dto';
 import { EsimGoOrderStatus } from '../provider/eSim-go/eSimGo.constant';
 import { ESimGoEsimData } from '../provider/eSim-go/schema/order/eSimGo-order.schema';
+import { priceSaleFormula } from 'src/common/constant/app.constant';
 
 @Injectable()
 export class OrderService {
@@ -226,13 +227,17 @@ export class OrderService {
                         product?.provider,
                     );
                 if (orderPro) {
+                    const addSalePrice = {
+                        ...orderPro,
+                        salePrice: priceSaleFormula(orderPro?.price),
+                    };
                     orderProducts.push({
-                        product: orderPro as any,
+                        product: addSalePrice as any,
                         quantity: product?.quantity ?? 1,
                     });
-                    total += (product?.quantity || 1) * (orderPro?.price || 1);
+                    total += (product?.quantity || 1) * addSalePrice?.salePrice;
                     subTotal +=
-                        (product?.quantity || 1) * (orderPro?.price || 1);
+                        (product?.quantity || 1) * addSalePrice?.salePrice;
                 } else throw ErrorBadRequest(`${product?.id} is not valid !`);
             }
             Object.assign(saveData, {
