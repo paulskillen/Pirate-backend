@@ -21,7 +21,7 @@ export const priceSaleFormula = (price: string | number) => {
     } else if (priceBase > 25 && priceBase <= 30) {
         priceCharged = 29.99;
     } else if (priceBase > 30) {
-        priceCharged = priceBase;
+        priceCharged = priceBase.toFixed(2);
     }
     return priceCharged;
 };
