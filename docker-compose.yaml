@@ -1,0 +1,30 @@
+version: '3.0'
+services:
+    api:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        env_file:
+            - compose.env
+        ports:
+            - 4000:4000
+        depends_on:
+            - redis
+            - mongodb
+        networks:
+            - pirate-network
+    redis:
+        image: redis:7
+        ports:
+            - 6379:6379
+        networks:
+            - pirate-network
+    mongodb:
+        image: mongo:6
+        ports:
+            - 27017:27017
+        networks:
+            - pirate-network
+networks:
+    pirate-network:
+        driver: bridge
