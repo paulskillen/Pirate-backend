@@ -114,8 +114,8 @@ export class CustomerAuthService {
                 password: input.password,
                 email: input.email,
                 phone: input?.phone,
-                phoneCode: input.phoneCode,
-                socialId: input.socialId,
+                phoneCode: input?.phoneCode,
+                socialId: input?.socialId,
                 avatar:
                     input?.avatar ??
                     'https://aws-s3-dehygienique.s3.amazonaws.com/W2Zp73lxjkwrHAYqlG7PAbXsUUBLUL4avAge.webp',
