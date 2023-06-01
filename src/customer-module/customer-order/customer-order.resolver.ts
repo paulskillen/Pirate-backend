@@ -51,7 +51,7 @@ export class CustomerOrderResolver extends OrderResolver {
         return { data };
     }
 
-    @CustomerAuthorization()
+    // @CustomerAuthorization()
     @Query(() => CustomerOrderDetailResponse)
     async detailOrderForCustomer(@Args('id') id: string): Promise<any> {
         const data = await this.orderService.findById(id);
