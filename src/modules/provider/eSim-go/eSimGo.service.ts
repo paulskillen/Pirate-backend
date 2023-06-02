@@ -6,6 +6,7 @@ import {
     Logger,
     OnModuleInit,
 } from '@nestjs/common';
+import * as fs from 'fs';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { HttpService } from '@nestjs/axios';
 import { catchError, firstValueFrom } from 'rxjs';
@@ -197,6 +198,8 @@ export class ESimGoService implements OnModuleInit {
                 }
             }
             try {
+                // const listJson = JSON.stringify(allData);
+                // await fs.writeFileSync('json/data.json', listJson);
                 await this.eSimGoCache.set(allData, {
                     key: ESIM_GO_BUNDLES_CACHE_KEY,
                     useStringify: false,
