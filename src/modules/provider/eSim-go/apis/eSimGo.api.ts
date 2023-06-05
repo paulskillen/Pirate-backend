@@ -10,6 +10,9 @@ export const ESIM_GO_GET_ESIM_QR_CODE_IMG = (code: string) =>
 // ****************************** BUNDLES ********************************//
 
 export const ESIM_GO_LIST_BUNDLES = `${ESIM_GO_API_URL}/catalogue`;
+export const ESIM_GO_LIST_BUNDLES_APPLIED_TO_ESIM = (iccid: string) =>
+    `${ESIM_GO_API_URL}/esims/${iccid}/bundles`;
+export const ESIM_GO_APPLY_BUNDLE_TO_ESIM = `${ESIM_GO_API_URL}/esims/apply`;
 
 // ****************************** ORDERS ********************************//
 

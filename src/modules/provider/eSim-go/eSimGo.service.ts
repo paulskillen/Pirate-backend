@@ -1,16 +1,32 @@
+import { HttpService } from '@nestjs/axios';
 import {
     CACHE_MANAGER,
-    forwardRef,
     Inject,
     Injectable,
     Logger,
     OnModuleInit,
 } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { HttpService } from '@nestjs/axios';
-import { catchError, firstValueFrom } from 'rxjs';
+import { AxiosError } from 'axios';
 import { Cache } from 'cache-manager';
+import { filter, find, includes, map } from 'lodash';
+import { catchError, firstValueFrom } from 'rxjs';
+import { ErrorInternalException } from 'src/common/errors/errors.constant';
+import { Order } from 'src/modules/order/schema/order.schema';
 import { AppCacheServiceManager } from 'src/setting/cache/app-cache.service';
+import {
+    ESIM_GO_APPLY_BUNDLE_TO_ESIM,
+    ESIM_GO_GET_ESIM_FROM_ORDER_REF,
+    ESIM_GO_GET_ESIM_QR_CODE_IMG,
+    ESIM_GO_LIST_BUNDLES,
+    ESIM_GO_LIST_BUNDLES_APPLIED_TO_ESIM,
+    ESIM_GO_LIST_ESIM_ASSIGNED_TO_YOU,
+    ESIM_GO_PROCESS_ORDERS,
+} from './apis/eSimGo.api';
+import {
+    ESimGoApplyBundleToEsimInput,
+    ESimGoOrderInput,
+} from './dto/order/eSimGo-order.dto';
 import {
     ESIM_GO_API_HEADER,
     ESIM_GO_BUNDLES_CACHE_KEY,
@@ -18,20 +34,7 @@ import {
     ESIM_GO_CACHE_KEY,
     ESIM_GO_CACHE_TTL,
 } from './eSimGo.constant';
-import { AppHelper } from 'src/common/helper/app.helper';
-import {
-    ESIM_GO_GET_ESIM_FROM_ORDER_REF,
-    ESIM_GO_GET_ESIM_QR_CODE_IMG,
-    ESIM_GO_LIST_BUNDLES,
-    ESIM_GO_LIST_ESIM_ASSIGNED_TO_YOU,
-    ESIM_GO_PROCESS_ORDERS,
-} from './apis/eSimGo.api';
-import { AxiosError } from 'axios';
-import { filter, find, includes, map } from 'lodash';
 import { ESimGoBundle } from './schema/bundle/eSimGo-bundle.schema';
-import { ESimGoOrderInput } from './dto/order/eSimGo-order.dto';
-import { ErrorInternalException } from 'src/common/errors/errors.constant';
-import { Order } from 'src/modules/order/schema/order.schema';
 import { ESimGoEsimData } from './schema/order/eSimGo-order.schema';
 
 @Injectable()
@@ -197,6 +200,8 @@ export class ESimGoService implements OnModuleInit {
                 }
             }
             try {
+                // const listJson = JSON.stringify(allData);
+                // await fs.writeFileSync('json/data.json', listJson);
                 await this.eSimGoCache.set(allData, {
                     key: ESIM_GO_BUNDLES_CACHE_KEY,
                     useStringify: false,
@@ -215,6 +220,31 @@ export class ESimGoService implements OnModuleInit {
         return allData;
     }
 
+    async getListBundleAppliedToEsim(iccid: string): Promise<ESimGoBundle[]> {
+        try {
+            const { data } = await firstValueFrom(
+                this.httpService
+                    .get(ESIM_GO_LIST_BUNDLES_APPLIED_TO_ESIM(iccid), {
+                        headers: { ...ESIM_GO_API_HEADER },
+                    })
+                    .pipe(
+                        catchError((error: AxiosError) => {
+                            this.logger.error(error.response.data);
+                            throw ErrorInternalException(error?.message);
+                        }),
+                    ),
+            );
+            return data;
+        } catch (error) {
+            this.logger.error(
+                'Get list bundle applied to eSim failed with error',
+                {
+                    error,
+                },
+            );
+        }
+    }
+
     async getListBundleFromCountry(
         countryCode: string,
     ): Promise<Array<ESimGoBundle>> {
@@ -226,6 +256,29 @@ export class ESimGoService implements OnModuleInit {
             ),
         );
         return data;
+    }
+
+    async applyBundleEsim(payload: ESimGoApplyBundleToEsimInput): Promise<any> {
+        try {
+            const { data } = await firstValueFrom(
+                this.httpService
+                    .post(ESIM_GO_APPLY_BUNDLE_TO_ESIM, payload, {
+                        headers: { ...ESIM_GO_API_HEADER },
+                    })
+                    .pipe(
+                        catchError((error: AxiosError) => {
+                            this.logger.error(error.response.data);
+                            throw ErrorInternalException(error?.message);
+                        }),
+                    ),
+            );
+
+            return data;
+        } catch (error) {
+            this.logger.error('Create EsimGo order failed with error', {
+                error,
+            });
+        }
     }
 
     // ****************************** ORDERS ********************************//
