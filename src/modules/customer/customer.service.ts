@@ -147,10 +147,20 @@ export class CustomerService {
         if (!customerNo) {
             throw Error('Something went wrong! Can not create Customer No !');
         }
+        const foundUser = await this.customerModel.find({
+            email: input?.email,
+        });
+        if (foundUser) {
+            throw Error(
+                'Email address is already registered, please login instead !',
+            );
+        }
         const saveData: Partial<Customer> = {
             ...input,
             customerNo,
-            password: await PasswordHelper.hash(input.password),
+            password: input.password
+                ? await PasswordHelper.hash(input.password)
+                : undefined,
         } as unknown as Customer;
         // if (auth?._id) {
         //   Object.assign(saveData, { createByAdmin: auth._id });
