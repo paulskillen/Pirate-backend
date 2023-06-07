@@ -31,14 +31,17 @@ export class CustomerRegisterInput {
     @Field()
     password: string;
 
+    @Field(() => GraphQLISODateTime, { nullable: true })
+    birthDay?: Date;
+
     @Field({ nullable: true })
     phoneCode?: string;
 
     @Field({ nullable: true })
-    socialId?: string;
+    phone?: string;
 
     @Field({ nullable: true })
-    phone?: string;
+    socialId?: string;
 
     // privacy information
     @Field(() => String, { nullable: true })
