@@ -37,6 +37,7 @@ import {
 } from './eSimGo.constant';
 import { ESimGoBundle } from './schema/bundle/eSimGo-bundle.schema';
 import { ESimGoEsimData } from './schema/order/eSimGo-order.schema';
+import { EsimGoHelper } from './eSimGo.helper';
 
 @Injectable()
 export class ESimGoService implements OnModuleInit {
@@ -170,7 +171,7 @@ export class ESimGoService implements OnModuleInit {
         return find(bundles, (item) => item?.name === id);
     }
 
-    async getListBundle(): Promise<ESimGoBundle[]> {
+    async getListBundle(isGoldBundle = true): Promise<ESimGoBundle[]> {
         let page = 0;
         let pageCount = 1;
         let allData: Array<any> = await this.eSimGoCache.get(
@@ -184,7 +185,11 @@ export class ESimGoService implements OnModuleInit {
                     this.httpService
                         .get(ESIM_GO_LIST_BUNDLES, {
                             headers: { ...ESIM_GO_API_HEADER },
-                            params: { perPage: 100, page },
+                            params: {
+                                perPage: 100,
+                                page,
+                                // groups: 'Gold eSIM Bundles',
+                            },
                         })
                         .pipe(
                             catchError((error: AxiosError) => {
@@ -193,6 +198,7 @@ export class ESimGoService implements OnModuleInit {
                             }),
                         ),
                 );
+
                 if (data?.pageCount) {
                     pageCount = data?.pageCount;
                 }
@@ -217,8 +223,15 @@ export class ESimGoService implements OnModuleInit {
                 );
             }
         }
+        let filteredData: Array<any> = [...(allData || [])];
 
-        return allData;
+        if (allData?.length > 0 && isGoldBundle) {
+            filteredData = filter(allData, (item) =>
+                EsimGoHelper.checkIsGoldBundle(item),
+            );
+        }
+
+        return filteredData;
     }
 
     async getListBundleAppliedToEsim(iccid: string): Promise<ESimGoBundle[]> {
