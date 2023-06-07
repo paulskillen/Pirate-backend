@@ -24,7 +24,8 @@ export const priceSaleFormula = (price: string | number) => {
     //     priceCharged = priceBase.toFixed(2);
     // }
     const marginBase = 2.5 * calPrice + 0;
-    const priceBase: number = marginBase + marginBase / 3;
+    // const priceBase: number = marginBase + marginBase / 3;
+    const priceBase: number = marginBase;
     let priceCharged;
     if (priceBase > 0 && priceBase <= 5) {
         priceCharged = 4.99;
