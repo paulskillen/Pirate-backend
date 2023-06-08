@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
+import { isPro } from 'src/common/config/app.config';
 
 @Injectable()
 export class MongoModule {
@@ -21,6 +22,7 @@ export class MongoModule {
                     );
                     return connection;
                 },
+                dbName: isPro ? 'pirate-mobile' : 'test',
             }),
             inject: [ConfigService],
         });

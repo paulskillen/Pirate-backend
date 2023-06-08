@@ -15,8 +15,6 @@ dotenv.config();
 @Injectable()
 export class GraphQlModule {
     static config() {
-        const isDev = process.env.APP_ENV === 'development';
-        const isPro = process.env.APP_ENV === 'production';
         return NestGraphQLModule.forRootAsync<ApolloDriverConfig>({
             driver: ApolloDriver,
             imports: [ConfigModule],
