@@ -13,17 +13,20 @@ export class MongoModule {
         mongoose.set('debug', isDev);
         return MongooseModule.forRootAsync({
             imports: [ConfigModule],
-            useFactory: async (configService: ConfigService) => ({
-                uri: configService.get<string>('MONGODB_URI'),
-                connectionFactory: (connection) => {
-                    connection.plugin(require('mongoose-paginate'));
-                    connection.plugin(
-                        require('mongoose-aggregate-paginate-v2'),
-                    );
-                    return connection;
-                },
-                dbName: isPro ? 'pirate-mobile' : 'test',
-            }),
+            useFactory: async (configService: ConfigService) => {
+                console.log({ isPro });
+                return {
+                    uri: configService.get<string>('MONGODB_URI'),
+                    connectionFactory: (connection) => {
+                        connection.plugin(require('mongoose-paginate'));
+                        connection.plugin(
+                            require('mongoose-aggregate-paginate-v2'),
+                        );
+                        return connection;
+                    },
+                    dbName: isPro ? 'pirate-mobile' : 'test',
+                };
+            },
             inject: [ConfigService],
         });
     }

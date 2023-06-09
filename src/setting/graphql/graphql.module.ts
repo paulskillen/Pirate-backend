@@ -7,6 +7,7 @@ import * as dotenv from 'dotenv';
 import * as depthLimit from 'graphql-depth-limit';
 import { createComplexityLimitRule } from 'graphql-validation-complexity';
 import { join } from 'path';
+import { isPro } from 'src/common/config/app.config';
 import AppLoaderModule from '../cache/app-cache.module';
 import { LIMIT_QUERY_COMPLEXITY, LIMIT_QUERY_DEPT } from './graphql.constant';
 
@@ -20,9 +21,8 @@ export class GraphQlModule {
             imports: [ConfigModule],
             useFactory: async (configService: ConfigService) => ({
                 autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-                debug: configService.get('ENV') == 'production' ? false : true,
-                playground:
-                    configService.get('ENV') == 'production' ? false : true,
+                debug: !isPro,
+                playground: !isPro,
                 validationRules: [
                     depthLimit(LIMIT_QUERY_DEPT),
                     createComplexityLimitRule(LIMIT_QUERY_COMPLEXITY, {
