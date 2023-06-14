@@ -145,13 +145,15 @@ export class CustomerService {
     async create(input: CustomerCreateInput, auth?: any): Promise<Customer> {
         const customerNo = await this.getNextNo();
         if (!customerNo) {
-            throw Error('Something went wrong! Can not create Customer No !');
+            throw ErrorInternalException(
+                'Something went wrong! Can not create Customer No !',
+            );
         }
         const foundUser = await this.customerModel.find({
             email: input?.email,
         });
         if (!isEmpty(foundUser)) {
-            throw Error(
+            throw ErrorNotFound(
                 'Email address is already registered, please login instead !',
             );
         }
