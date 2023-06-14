@@ -2,7 +2,7 @@ import { CACHE_MANAGER, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cache } from 'cache-manager';
-import { map } from 'lodash';
+import { isEmpty, map } from 'lodash';
 import * as moment from 'moment';
 import { PaginateModel } from 'mongoose';
 import { SoftDeleteModel } from 'mongoose-delete';
@@ -150,7 +150,7 @@ export class CustomerService {
         const foundUser = await this.customerModel.find({
             email: input?.email,
         });
-        if (foundUser) {
+        if (!isEmpty(foundUser)) {
             throw Error(
                 'Email address is already registered, please login instead !',
             );
