@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AxiosError } from 'axios';
 import { Cache } from 'cache-manager';
-import { filter, find, includes, map } from 'lodash';
+import { filter, find, forEach, includes, map, uniqBy } from 'lodash';
 import { catchError, firstValueFrom } from 'rxjs';
 import { ErrorInternalException } from 'src/common/errors/errors.constant';
 import { Order } from 'src/modules/order/schema/order.schema';
@@ -34,8 +34,12 @@ import {
     ESIM_GO_BUNDLES_CACHE_TTL,
     ESIM_GO_CACHE_KEY,
     ESIM_GO_CACHE_TTL,
+    ESIM_GO_SUPPORTED_COUNTRIES_CACHE_KEY,
 } from './eSimGo.constant';
-import { ESimGoBundle } from './schema/bundle/eSimGo-bundle.schema';
+import {
+    ESimGoBundle,
+    ESimGoBundleCountry,
+} from './schema/bundle/eSimGo-bundle.schema';
 import { ESimGoEsimData } from './schema/order/eSimGo-order.schema';
 import { EsimGoHelper } from './eSimGo.helper';
 
@@ -209,11 +213,30 @@ export class ESimGoService implements OnModuleInit {
             try {
                 // const listJson = JSON.stringify(allData);
                 // await fs.writeFileSync('src/asset/json/data.json', listJson);
+
                 await this.eSimGoCache.set(allData, {
                     key: ESIM_GO_BUNDLES_CACHE_KEY,
                     useStringify: false,
                     ttl: ESIM_GO_BUNDLES_CACHE_TTL,
                 });
+
+                const supportedCountries: Array<ESimGoBundleCountry> = [];
+                forEach(allData, (item) => {
+                    if (item?.countries && item?.countries?.length > 0) {
+                        forEach(item?.countries ?? [], (country) => {
+                            supportedCountries.push(country);
+                        });
+                    }
+                });
+                if (supportedCountries?.length > 0) {
+                    const filteredCountries: Array<ESimGoBundleCountry> =
+                        uniqBy(supportedCountries, (item) => item?.iso);
+                    await this.eSimGoCache.set(filteredCountries, {
+                        key: ESIM_GO_SUPPORTED_COUNTRIES_CACHE_KEY,
+                        useStringify: true,
+                        ttl: ESIM_GO_BUNDLES_CACHE_TTL,
+                    });
+                }
             } catch (error) {
                 this.logger.error(
                     'Get list bundles from EsimGo  failed with error',

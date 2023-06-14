@@ -8,6 +8,7 @@ export const ESIM_GO_BUNDLES_CACHE_TTL = 12 * 60 * 60 * 1000;
 export const ESIM_GO_PREFIX_CODE = 'ESG';
 export const ESIM_GO_CACHE_KEY = '{esim_go_cache_key}:';
 export const ESIM_GO_BUNDLES_CACHE_KEY = `${ESIM_GO_CACHE_KEY}_Bundles_All`;
+export const ESIM_GO_SUPPORTED_COUNTRIES_CACHE_KEY = `${ESIM_GO_CACHE_KEY}_Supported_Countries`;
 
 export const ESIM_GO_API_URL = process.env.ESIM_GO_API_URL;
 export const ESIM_GO_API_URL_VERSION_1 = process.env.ESIM_GO_API_URL_V1;
