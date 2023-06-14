@@ -2,7 +2,7 @@ import { CACHE_MANAGER, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cache } from 'cache-manager';
-import { map } from 'lodash';
+import { isEmpty, map } from 'lodash';
 import * as moment from 'moment';
 import { PaginateModel } from 'mongoose';
 import { SoftDeleteModel } from 'mongoose-delete';
@@ -145,13 +145,15 @@ export class CustomerService {
     async create(input: CustomerCreateInput, auth?: any): Promise<Customer> {
         const customerNo = await this.getNextNo();
         if (!customerNo) {
-            throw Error('Something went wrong! Can not create Customer No !');
+            throw ErrorInternalException(
+                'Something went wrong! Can not create Customer No !',
+            );
         }
         const foundUser = await this.customerModel.find({
             email: input?.email,
         });
-        if (foundUser) {
-            throw Error(
+        if (!isEmpty(foundUser)) {
+            throw ErrorNotFound(
                 'Email address is already registered, please login instead !',
             );
         }
