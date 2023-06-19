@@ -1,3 +1,5 @@
+export const EMAIL_DEFAULT = 'esim@piratemobile.gg';
+
 export enum RefEmail {
     ORDER_REFERENCES = 'ORDER_REFERENCES',
 }

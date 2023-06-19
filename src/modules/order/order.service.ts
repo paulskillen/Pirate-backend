@@ -49,6 +49,8 @@ import { ESimGoOrderInput } from '../provider/eSim-go/dto/order/eSimGo-order.dto
 import { EsimGoOrderStatus } from '../provider/eSim-go/eSimGo.constant';
 import { ESimGoEsimData } from '../provider/eSim-go/schema/order/eSimGo-order.schema';
 import { priceSaleFormula } from 'src/common/constant/app.constant';
+import { EmailService } from '../email/email.service';
+import { EMAIL_ORDER_REFERENCES_TEMPLATE } from '../email/email.constant';
 
 @Injectable()
 export class OrderService {
@@ -70,6 +72,8 @@ export class OrderService {
         private eventEmitter: EventEmitter2,
 
         private eSimGoService: ESimGoService,
+
+        private emailService: EmailService,
     ) {}
 
     orderCache = new AppCacheServiceManager(
@@ -595,5 +599,13 @@ export class OrderService {
         } catch (error) {
             throw ErrorInternalException(error);
         }
+    }
+
+    async sendEmail() {
+        const res = await this.emailService.create({
+            to: 'jokerhp6789@gmail.com',
+            subject: 'Test Email',
+            message: EMAIL_ORDER_REFERENCES_TEMPLATE(),
+        });
     }
 }

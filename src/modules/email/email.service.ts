@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { EmailInputDto } from './dto/email.dto';
+import { EMAIL_DEFAULT } from './email.constant';
 import emailClient from './node-ses/node-ses';
 
 const options: any = {
@@ -20,7 +21,7 @@ export class EmailService {
         const { from, to, subject, message } = input;
         const res = await emailClient.sendEmail(
             {
-                from,
+                from: from || EMAIL_DEFAULT,
                 to,
                 subject,
                 message,

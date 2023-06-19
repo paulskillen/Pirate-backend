@@ -2,8 +2,8 @@ import { Field, InputType } from '@nestjs/graphql';
 
 @InputType()
 export class EmailInputDto {
-    @Field(() => String)
-    from: string;
+    @Field(() => String, { nullable: true })
+    from?: string;
 
     @Field(() => String)
     to: string;
