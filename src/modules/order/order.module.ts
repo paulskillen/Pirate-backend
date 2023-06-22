@@ -8,10 +8,12 @@ import { ProviderBundleModule } from '../provider-bundle/provider-bundle.module'
 import { CustomerModule } from '../customer/customer.module';
 import { ProviderModule } from '../provider/provider.module';
 import { OrderListener } from './listener/order.listener';
+import { EmailModule } from '../email/email.module';
 
 @Module({
     imports: [
         forwardRef(() => CustomerModule),
+        EmailModule,
         ProviderModule,
         ProviderBundleModule,
         MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
