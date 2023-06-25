@@ -21,3 +21,21 @@ export enum EsimGoOrderStatus {
 registerEnumType(EsimGoOrderStatus, {
     name: 'EsimGoOrderStatus',
 });
+
+export const ESIM_GO_MOCKUP_ORDER = {
+    order: [
+        {
+            type: 'bundle',
+            item: 'esimg_1GB_7D_BE_U',
+            quantity: 1,
+            subTotal: 1.7,
+            pricePerUnit: 1.7,
+        },
+    ],
+    total: 1.7,
+    currency: 'USD',
+    status: 'completed',
+    statusMessage: 'Order completed: 1 eSIMs assigned',
+    orderReference: 'c7ca7c4c-c2bd-470b-b556-41f03bbb1029',
+    assigned: true,
+};
