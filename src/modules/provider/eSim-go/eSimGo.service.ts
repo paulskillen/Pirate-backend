@@ -335,7 +335,7 @@ export class ESimGoService implements OnModuleInit {
                         }),
                     ),
             );
-
+            return data;
             // return ESIM_GO_MOCKUP_ORDER;
         } catch (error) {
             this.logger.error('Create EsimGo order failed with error', {
