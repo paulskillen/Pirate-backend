@@ -118,7 +118,7 @@ export class CustomerService {
     }
 
     async login(username: string): Promise<Customer> {
-        return this.customerModel
+        return await this.customerModel
             .findOneAndUpdate(
                 { $or: [{ email: username }] },
                 { $set: { lastLogin: new Date() } },
