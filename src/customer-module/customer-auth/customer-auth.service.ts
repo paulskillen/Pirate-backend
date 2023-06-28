@@ -6,6 +6,7 @@ import { CustomerService } from 'src/modules/customer/customer.service';
 import { CustomerStatus } from 'src/modules/customer/customer.constant';
 import { CustomerRegisterInput } from 'src/modules/customer/dto/customer.input';
 import { ErrorNotFound } from 'src/common/errors/errors.constant';
+import { Customer } from 'src/modules/customer/schema/customer.schema';
 
 export type AuthPayload = {
     id: string;
@@ -22,7 +23,7 @@ export class CustomerAuthService {
         private readonly jwtService: JwtService,
     ) {}
 
-    async validateUser(email: string, pass: string): Promise<AuthPayload> {
+    async validateUser(email: string, pass: string): Promise<Customer> {
         const customer: any = await this.customerService.login(email);
 
         if (
@@ -37,10 +38,7 @@ export class CustomerAuthService {
 
     async login(email: string, password: string): Promise<any | null> {
         try {
-            const payload: AuthPayload = await this.validateUser(
-                email,
-                password,
-            );
+            const payload: Customer = await this.validateUser(email, password);
             if (!payload) {
                 throw new AuthenticationError('Email or Password Invalid');
             }
@@ -54,7 +52,7 @@ export class CustomerAuthService {
             //     };
             // }
 
-            const accessToken = await this.getJwtAccessToken(payload?.id);
+            const accessToken = await this.getJwtAccessToken(payload?._id);
             return {
                 accessToken,
                 isVerified: true,
