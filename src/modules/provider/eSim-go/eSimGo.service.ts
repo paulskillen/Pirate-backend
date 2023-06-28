@@ -323,20 +323,20 @@ export class ESimGoService implements OnModuleInit {
 
     async createOrder(payload: ESimGoOrderInput): Promise<any> {
         try {
-            // const { data } = await firstValueFrom(
-            //     this.httpService
-            //         .post(ESIM_GO_PROCESS_ORDERS, payload, {
-            //             headers: { ...ESIM_GO_API_HEADER },
-            //         })
-            //         .pipe(
-            //             catchError((error: AxiosError) => {
-            //                 this.logger.error(error.response.data);
-            //                 throw ErrorInternalException(error?.message);
-            //             }),
-            //         ),
-            // );
+            const { data } = await firstValueFrom(
+                this.httpService
+                    .post(ESIM_GO_PROCESS_ORDERS, payload, {
+                        headers: { ...ESIM_GO_API_HEADER },
+                    })
+                    .pipe(
+                        catchError((error: AxiosError) => {
+                            this.logger.error(error.response.data);
+                            throw ErrorInternalException(error?.message);
+                        }),
+                    ),
+            );
 
-            return ESIM_GO_MOCKUP_ORDER;
+            // return ESIM_GO_MOCKUP_ORDER;
         } catch (error) {
             this.logger.error('Create EsimGo order failed with error', {
                 error,
