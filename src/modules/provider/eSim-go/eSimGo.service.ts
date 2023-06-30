@@ -43,6 +43,7 @@ import {
 } from './schema/bundle/eSimGo-bundle.schema';
 import { ESimGoEsimData } from './schema/order/eSimGo-order.schema';
 import { EsimGoHelper } from './eSimGo.helper';
+import { isPro } from 'src/common/config/app.config';
 
 @Injectable()
 export class ESimGoService implements OnModuleInit {
@@ -323,20 +324,21 @@ export class ESimGoService implements OnModuleInit {
 
     async createOrder(payload: ESimGoOrderInput): Promise<any> {
         try {
-            const { data } = await firstValueFrom(
-                this.httpService
-                    .post(ESIM_GO_PROCESS_ORDERS, payload, {
-                        headers: { ...ESIM_GO_API_HEADER },
-                    })
-                    .pipe(
-                        catchError((error: AxiosError) => {
-                            this.logger.error(error.response.data);
-                            throw ErrorInternalException(error?.message);
-                        }),
-                    ),
-            );
-            return data;
-            // return ESIM_GO_MOCKUP_ORDER;
+            if (isPro) {
+                const { data } = await firstValueFrom(
+                    this.httpService
+                        .post(ESIM_GO_PROCESS_ORDERS, payload, {
+                            headers: { ...ESIM_GO_API_HEADER },
+                        })
+                        .pipe(
+                            catchError((error: AxiosError) => {
+                                this.logger.error(error.response.data);
+                                throw ErrorInternalException(error?.message);
+                            }),
+                        ),
+                );
+                return data;
+            } else return ESIM_GO_MOCKUP_ORDER;
         } catch (error) {
             this.logger.error('Create EsimGo order failed with error', {
                 error,
