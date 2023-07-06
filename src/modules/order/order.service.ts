@@ -51,6 +51,7 @@ import { ESimGoEsimData } from '../provider/eSim-go/schema/order/eSimGo-order.sc
 import { priceSaleFormula } from 'src/common/constant/app.constant';
 import { EmailService } from '../email/email.service';
 import { EMAIL_ORDER_REFERENCES_TEMPLATE } from '../email/email.constant';
+import { CustomerSendEmailAfterOrderInput } from 'src/customer-module/customer-order/dto/customer-order.input';
 
 @Injectable()
 export class OrderService {
@@ -601,9 +602,22 @@ export class OrderService {
         }
     }
 
-    async sendEmail() {
+    async sendEmailAfterOrder(input: CustomerSendEmailAfterOrderInput) {
+        const { orderId, customerId, email } = input || {};
+        if (!email && !customerId) {
+            throw ErrorBadRequest('Email can not be empty !');
+        }
+        let emailToSend = email;
+        if (!emailToSend) {
+            const customer = await this.customerService.findById(customerId);
+            emailToSend = customer?.email;
+        }
+        if (!emailToSend) {
+            throw ErrorBadRequest('Email can not be empty !');
+        }
+        const order = await this.findById(orderId);
         const res = await this.emailService.create({
-            to: 'jokerhp6789@gmail.com',
+            to: emailToSend,
             subject: 'Test Email',
             message: EMAIL_ORDER_REFERENCES_TEMPLATE(),
         });

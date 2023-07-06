@@ -19,6 +19,7 @@ import {
     CustomerOrderDto,
     CustomerOrderPaginateResponse,
 } from './dto/customer-order.dto';
+import { CustomerSendEmailAfterOrderInput } from './dto/customer-order.input';
 
 @Resolver(() => CustomerOrderDto)
 export class CustomerOrderResolver extends OrderResolver {
@@ -86,9 +87,15 @@ export class CustomerOrderResolver extends OrderResolver {
         return { data };
     }
 
-    @Mutation(() => JSON)
-    async sendEmailForCustomer(): Promise<any> {
-        const data = await this.orderService.sendEmail();
-        return { data };
+    @Mutation(() => Boolean)
+    async sendEmailAfterOrderForCustomer(
+        @Args('input') input: CustomerSendEmailAfterOrderInput,
+    ): Promise<any> {
+        try {
+            const data = await this.orderService.sendEmailAfterOrder(input);
+        } catch (error) {
+            console.error({ error });
+        }
+        return true;
     }
 }
