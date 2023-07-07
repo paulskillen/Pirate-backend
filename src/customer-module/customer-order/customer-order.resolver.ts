@@ -1,7 +1,6 @@
 import { CACHE_MANAGER, Inject, forwardRef } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Cache } from 'cache-manager';
-import JSON from 'graphql-type-json';
 import { CustomerService } from 'src/modules/customer/customer.service';
 import {
     OrderCreateInput,
@@ -93,9 +92,11 @@ export class CustomerOrderResolver extends OrderResolver {
     ): Promise<any> {
         try {
             const data = await this.orderService.sendEmailAfterOrder(input);
+            return data;
         } catch (error) {
             console.error({ error });
+            return error;
         }
-        return true;
+        return false;
     }
 }

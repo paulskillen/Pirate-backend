@@ -602,12 +602,25 @@ export class OrderService {
         }
     }
 
-    async sendEmailAfterOrder(input: CustomerSendEmailAfterOrderInput) {
+    async sendEmailAfterOrder(
+        input: CustomerSendEmailAfterOrderInput,
+    ): Promise<boolean> {
         const { orderId, customerId, email } = input || {};
         if (!email && !customerId) {
             throw ErrorBadRequest('Email can not be empty !');
         }
-        let emailToSend = email;
+        if (!orderId) {
+            throw ErrorBadRequest('Order can not be empty !');
+        }
+        let emailToSend = null;
+        let isExistedEmail = false;
+        if (email) {
+            emailToSend = email;
+            const checkExisted = await this.customerService.findOne({ email });
+            if (checkExisted) {
+                isExistedEmail = true;
+            }
+        }
         if (!emailToSend) {
             const customer = await this.customerService.findById(customerId);
             emailToSend = customer?.email;
@@ -615,11 +628,37 @@ export class OrderService {
         if (!emailToSend) {
             throw ErrorBadRequest('Email can not be empty !');
         }
-        const order = await this.findById(orderId);
-        const res = await this.emailService.create({
-            to: emailToSend,
-            subject: 'Test Email',
-            message: EMAIL_ORDER_REFERENCES_TEMPLATE(),
-        });
+        let order = await this.findById(orderId);
+        let eSimQrCode = order?.eSimData?.qrCode;
+        let retryEffort = 1;
+        while (!eSimQrCode && retryEffort < 20) {
+            setTimeout(async () => {
+                order = await this.findById(orderId);
+                eSimQrCode = order?.eSimData?.qrCode;
+                retryEffort++;
+                this.logger.log(`This is retrying effort ${retryEffort}`);
+            }, 1000);
+        }
+        const attachmentCid = '@esimQrCode';
+        if (eSimQrCode) {
+            const res = await this.emailService.sentWithAttachment({
+                to: emailToSend,
+                subject: 'Your eSim Qr Code',
+                message: EMAIL_ORDER_REFERENCES_TEMPLATE(attachmentCid),
+                attachments: [
+                    {
+                        // encoded string as an attachment
+                        filename: 'eSim_qrCode.png',
+                        path: `data:image/png;base64,${eSimQrCode}`,
+                        content: eSimQrCode,
+                        encoding: 'base64',
+                        cid: attachmentCid,
+                    },
+                ],
+            });
+        } else {
+            console.error('Can not find Qr Code of Esim');
+        }
+        return true;
     }
 }
