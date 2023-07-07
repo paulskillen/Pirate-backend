@@ -14,6 +14,10 @@ export class OrderConsumer {
     ): Promise<boolean> {
         const { data } = job || {};
         const retried = await this.orderService.sendEmailAfterOrder(data);
+        console.log(
+            '🚀 >>>>>> file: order.consumer.ts:18 >>>>>> OrderConsumer >>>>>> retried:',
+            retried,
+        );
         return true;
     }
 }
