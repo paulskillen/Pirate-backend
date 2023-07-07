@@ -1,4 +1,4 @@
-export const EMAIL_DEFAULT = 'esim@piratemobile.gg';
+export const EMAIL_DEFAULT = 'Pirate Mobile esim@piratemobile.gg';
 
 export enum RefEmail {
     ORDER_REFERENCES = 'ORDER_REFERENCES',
@@ -7,14 +7,16 @@ export enum RefEmail {
 export const INTERNAL_EMAIL_SENDER =
     '"Pirate Mobile" <no-reply@piratemobile.gg>';
 
-export const EMAIL_ORDER_REFERENCES_TEMPLATE = () => `
+export const EMAIL_ORDER_REFERENCES_TEMPLATE = (attachmentCid?: string) => `
 <p>
 Thank you for choosing Pirate Mobile <br/>
 Please see attached the QR code to activate your eSim. <br/>
 Here are the steps a to activate an eSIM using a QR code:<br/>
 </p>
 
-<img style="width:250px;height:250px" alt="Qr Code" src="cid:@esimQrCode" />
+<img style="width:250px;height:250px" alt="Qr Code" src="cid:${
+    attachmentCid || '@esimQrCode'
+}" />
 
 <p>
 1. Ensure that their device is eSIM compatible. They can check their device specifications or contact their carrier to confirm.

@@ -11,7 +11,6 @@ import {
     LoginResponseDto,
     LoginSocialResponseDto,
 } from './dto/customer-auth.dto';
-import JSON from 'graphql-type-json';
 import { LoginInput } from './dto/customer-auth.input';
 import { ErrorNotFound } from 'src/common/errors/errors.constant';
 

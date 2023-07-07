@@ -7,7 +7,7 @@ export class EmailResolver {
 
     @Mutation((returns) => Boolean)
     async sendEmail(): Promise<any> {
-        return await this.emailService.create({
+        return await this.emailService.sent({
             from: 'no-reply@jobs.dermaster.co.th',
             to: 'trung@lotusmattress.com',
             subject: 'Test Email',

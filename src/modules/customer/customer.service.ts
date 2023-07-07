@@ -109,6 +109,10 @@ export class CustomerService {
 
     // ****************************** QUERY DATA ********************************//
 
+    async findOne(condition: any, auth?: any): Promise<CustomerDocument> {
+        return await this.customerModel.findOne(condition);
+    }
+
     async findByIds(ids: string[]): Promise<Customer[] | undefined> {
         return this.customerModel.find({ _id: { $in: ids } }).exec();
     }

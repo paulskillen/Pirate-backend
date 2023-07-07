@@ -51,6 +51,7 @@ import { ESimGoEsimData } from '../provider/eSim-go/schema/order/eSimGo-order.sc
 import { priceSaleFormula } from 'src/common/constant/app.constant';
 import { EmailService } from '../email/email.service';
 import { EMAIL_ORDER_REFERENCES_TEMPLATE } from '../email/email.constant';
+import { CustomerSendEmailAfterOrderInput } from 'src/customer-module/customer-order/dto/customer-order.input';
 
 @Injectable()
 export class OrderService {
@@ -601,11 +602,63 @@ export class OrderService {
         }
     }
 
-    async sendEmail() {
-        const res = await this.emailService.create({
-            to: 'jokerhp6789@gmail.com',
-            subject: 'Test Email',
-            message: EMAIL_ORDER_REFERENCES_TEMPLATE(),
-        });
+    async sendEmailAfterOrder(
+        input: CustomerSendEmailAfterOrderInput,
+    ): Promise<boolean> {
+        const { orderId, customerId, email } = input || {};
+        if (!email && !customerId) {
+            throw ErrorBadRequest('Email can not be empty !');
+        }
+        if (!orderId) {
+            throw ErrorBadRequest('Order can not be empty !');
+        }
+        let emailToSend = null;
+        let isExistedEmail = false;
+        if (email) {
+            emailToSend = email;
+            const checkExisted = await this.customerService.findOne({ email });
+            if (checkExisted) {
+                isExistedEmail = true;
+            }
+        }
+        if (!emailToSend) {
+            const customer = await this.customerService.findById(customerId);
+            emailToSend = customer?.email;
+        }
+        if (!emailToSend) {
+            throw ErrorBadRequest('Email can not be empty !');
+        }
+        let order = await this.findById(orderId);
+        let eSimQrCode = order?.eSimData?.qrCode;
+        let retryEffort = 1;
+        while (!eSimQrCode && retryEffort < 20) {
+            setTimeout(async () => {
+                order = await this.findById(orderId);
+                eSimQrCode = order?.eSimData?.qrCode;
+                retryEffort++;
+                this.logger.log(`This is retrying effort ${retryEffort}`);
+            }, 1000);
+        }
+        const attachmentCid = '@esimQrCode';
+        if (eSimQrCode) {
+            const res = await this.emailService.sentWithAttachment({
+                to: emailToSend,
+                subject: 'Your eSim Qr Code',
+                message: EMAIL_ORDER_REFERENCES_TEMPLATE(attachmentCid),
+                attachments: [
+                    {
+                        // encoded string as an attachment
+                        filename: 'eSim_qrCode.png',
+                        path: `data:image/png;base64,${eSimQrCode}`,
+                        content: eSimQrCode,
+                        encoding: 'base64',
+                        cid: attachmentCid,
+                    },
+                ],
+            });
+        } else {
+            console.error('Can not find Qr Code of Esim');
+        }
+        return true;
     }
 }
