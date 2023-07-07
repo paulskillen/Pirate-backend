@@ -52,6 +52,7 @@ import { priceSaleFormula } from 'src/common/constant/app.constant';
 import { EmailService } from '../email/email.service';
 import { EMAIL_ORDER_REFERENCES_TEMPLATE } from '../email/email.constant';
 import { CustomerSendEmailAfterOrderInput } from 'src/customer-module/customer-order/dto/customer-order.input';
+import { OrderQueue } from './queue/order.queue';
 
 @Injectable()
 export class OrderService {
@@ -75,6 +76,8 @@ export class OrderService {
         private eSimGoService: ESimGoService,
 
         private emailService: EmailService,
+
+        private orderQueue: OrderQueue,
     ) {}
 
     orderCache = new AppCacheServiceManager(
@@ -628,17 +631,8 @@ export class OrderService {
         if (!emailToSend) {
             throw ErrorBadRequest('Email can not be empty !');
         }
-        let order = await this.findById(orderId);
-        let eSimQrCode = order?.eSimData?.qrCode;
-        let retryEffort = 1;
-        while (!eSimQrCode && retryEffort < 20) {
-            setTimeout(async () => {
-                order = await this.findById(orderId);
-                eSimQrCode = order?.eSimData?.qrCode;
-                retryEffort++;
-                this.logger.log(`This is retrying effort ${retryEffort}`);
-            }, 1000);
-        }
+        const order = await this.findById(orderId);
+        const eSimQrCode = order?.eSimData?.qrCode;
         const attachmentCid = '@esimQrCode';
         if (eSimQrCode) {
             const res = await this.emailService.sentWithAttachment({
@@ -658,6 +652,11 @@ export class OrderService {
             });
         } else {
             console.error('Can not find Qr Code of Esim');
+            const added = await this.orderQueue.addRetrySendEmailAfterOrder({
+                orderId,
+                email: emailToSend,
+            });
+            return false;
         }
         return true;
     }
