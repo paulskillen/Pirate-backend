@@ -2,6 +2,7 @@ import {
     Field,
     GraphQLISODateTime,
     InputType,
+    Int,
     OmitType,
     PartialType,
     PickType,
@@ -18,4 +19,7 @@ export class CustomerSendEmailAfterOrderInput {
 
     @Field(() => String, { nullable: true })
     orderId?: string;
+
+    @Field(() => Int, { nullable: true })
+    retryEffortCount?: number;
 }
