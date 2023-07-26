@@ -106,8 +106,6 @@ export class OrderService {
         const {
             status,
             _id,
-            products,
-            total,
             subTotal,
             customer: orderCustomer,
         } = order;
