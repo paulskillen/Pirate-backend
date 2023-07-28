@@ -1,4 +1,4 @@
-import { Field, Int, ObjectType, PickType } from '@nestjs/graphql';
+import { Field, ObjectType, PickType } from '@nestjs/graphql';
 import JSON from 'graphql-type-json';
 import { BaseDto } from 'src/common/base/base.dto';
 import { PaginateResponse } from 'src/common/paginate/dto/paginate.dto';
