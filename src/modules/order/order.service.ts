@@ -24,6 +24,7 @@ import {
     ORDER_CACHE_TTL,
     ORDER_EXPIRY_DAYS,
     ORDER_PREFIX_CODE,
+    OrderType,
 } from './order.constant';
 import { PaginateHelper } from 'src/common/helper/paginate.helper';
 import { AppHelper } from 'src/common/helper/app.helper';
@@ -103,12 +104,7 @@ export class OrderService {
         input: OrderProcessInput,
         order: Order,
     ): { error: boolean; message: string | null } {
-        const {
-            status,
-            _id,
-            subTotal,
-            customer: orderCustomer,
-        } = order;
+        const { status, _id, subTotal, customer: orderCustomer } = order;
         const { payment = [], customer } = input;
         const orderId = _id?.toString();
         if (status !== OrderStatus.PENDING_PAYMENT) {
@@ -202,6 +198,7 @@ export class OrderService {
         let subTotal = 0;
         let provider: any = null;
         let orderContact: Partial<OrderContact> = null;
+        let orderType = OrderType.BUY_NEW;
 
         if (customer) {
             const customerData = await this.getOrderCustomer(customer);
@@ -227,6 +224,9 @@ export class OrderService {
             const orderProducts: OrderProduct[] = [];
             provider = products?.[0]?.provider;
             for (const product of products) {
+                if (product?.assignTo) {
+                    orderType = OrderType.TOP_UP;
+                }
                 const orderPro =
                     await this.providerBundleService.getBundleFromProvider(
                         product?.id,
@@ -240,6 +240,7 @@ export class OrderService {
                     orderProducts.push({
                         product: addSalePrice as any,
                         quantity: product?.quantity ?? 1,
+                        assignTo: product?.assignTo,
                     });
                     total += (product?.quantity || 1) * addSalePrice?.salePrice;
                     subTotal +=
@@ -255,7 +256,7 @@ export class OrderService {
             Object.assign(saveData, { createdByAdmin: auth._id });
         }
 
-        Object.assign(saveData, { total, subTotal, provider });
+        Object.assign(saveData, { total, subTotal, provider, orderType });
 
         return saveData;
     }
@@ -286,13 +287,23 @@ export class OrderService {
         const esimGoOrder: ESimGoOrderInput['Order'] = [];
         const { products } = orderData;
         for (const product of products) {
+            const { assignTo } = product || {};
             const { id, name } = product?.product || {};
             const proQty = product?.quantity ?? 1;
-            esimGoOrder.push({
-                type: 'bundle',
-                item: id || name,
-                quantity: proQty,
-            });
+            if (assignTo) {
+                esimGoOrder.push({
+                    type: 'bundle',
+                    item: id || name,
+                    quantity: proQty,
+                    iccids: [assignTo],
+                });
+            } else {
+                esimGoOrder.push({
+                    type: 'bundle',
+                    item: id || name,
+                    quantity: proQty,
+                });
+            }
         }
 
         return {
