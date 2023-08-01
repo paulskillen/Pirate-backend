@@ -20,7 +20,7 @@ export class OrderProductInput {
     @Field(() => Int, { defaultValue: 1 })
     quantity: number;
 
-    @Field(() => String, { defaultValue: 1 })
+    @Field(() => String, { nullable: true })
     assignTo: string;
 
     @Field(() => ProviderName)
