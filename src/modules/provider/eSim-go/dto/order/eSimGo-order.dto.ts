@@ -3,7 +3,12 @@ export class ESimGoOrderInput {
 
     assign: boolean;
 
-    Order: { type: 'bundle'; item: string; quantity: number }[];
+    Order: {
+        type: 'bundle';
+        item: string;
+        quantity: number;
+        iccids?: [string];
+    }[];
 }
 
 export class ESimGoApplyBundleToEsimInput {

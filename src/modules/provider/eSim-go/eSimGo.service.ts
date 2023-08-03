@@ -23,6 +23,7 @@ import {
     ESIM_GO_LIST_BUNDLES_APPLIED_TO_ESIM,
     ESIM_GO_LIST_ESIM_ASSIGNED_TO_YOU,
     ESIM_GO_PROCESS_ORDERS,
+    ESIM_GO_SEND_SMS_TO_ESIM,
 } from './apis/eSimGo.api';
 import {
     ESimGoApplyBundleToEsimInput,
@@ -168,6 +169,39 @@ export class ESimGoService implements OnModuleInit {
         const { iccid } = esimData ?? {};
         const qrCode = await this.getESimQrCodeImgFromESimCode(iccid);
         return { ...esimData, qrCode };
+    }
+
+    async sendSmsToAnESim(
+        iccid: string,
+        payload?: any,
+    ): Promise<ESimGoEsimData[]> {
+        try {
+            const { data } = await firstValueFrom(
+                this.httpService
+                    .post(
+                        ESIM_GO_SEND_SMS_TO_ESIM(iccid),
+                        {
+                            message: 'Form Pirate Mobile with love♥︎ !',
+                            from: 'eSIM',
+                            ...(payload || {}),
+                        },
+                        {
+                            headers: { ...ESIM_GO_API_HEADER },
+                        },
+                    )
+                    .pipe(
+                        catchError((error: AxiosError) => {
+                            this.logger.error(error.response.data);
+                            throw ErrorInternalException(error?.message);
+                        }),
+                    ),
+            );
+            return data;
+        } catch (error) {
+            this.logger.error('getESimDataFromOrderRef Error', {
+                error,
+            });
+        }
     }
 
     // ****************************** BUNDLES ********************************//
