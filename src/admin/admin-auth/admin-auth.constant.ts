@@ -5,7 +5,6 @@ export enum Device {
     APP = 'APP',
     WEBSITE = 'WEBSITE',
 }
-
 registerEnumType(Device, {
     name: 'Device',
 });

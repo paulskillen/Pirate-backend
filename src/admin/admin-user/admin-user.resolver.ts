@@ -8,7 +8,6 @@ import {
     Resolver,
 } from '@nestjs/graphql';
 import { Cache } from 'cache-manager';
-import { identity, pickBy } from 'lodash';
 import { PERMISSION } from 'src/common/constant/permission.constant';
 import { IPaginationResult } from 'src/common/helper/paginate.helper';
 import { AdminAuthorization } from '../admin-auth/decorator/authorization.decorator';
@@ -43,11 +42,7 @@ export class AdminUserResolver {
     async searchAdminUserForAdmin(
         @Args('paginate') paginate: SearchAdminUserInput,
     ): Promise<IPaginationResult> {
-        const { jobType, ...paginateParams } = paginate;
-        return this.adminUserService.findAll(
-            paginateParams,
-            pickBy({ jobType }, identity),
-        );
+        return this.adminUserService.findAll(paginate);
     }
 
     @AdminAuthorization(PERMISSION.ADMIN.USER.LIST)

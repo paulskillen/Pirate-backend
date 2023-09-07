@@ -63,9 +63,6 @@ export class CreateAdminUserInput {
 
     @Field(() => [OrderStatus], { nullable: true })
     orderStatusManagement: OrderStatus[];
-
-    @Field(() => [String], { nullable: true })
-    branch: string[];
 }
 
 @InputType()
@@ -78,10 +75,4 @@ export class UpdateAdminUserInput extends PartialType(CreateAdminUserInput) {
 export class ListAdminUserInput extends PaginateRequest {}
 
 @InputType()
-export class SearchAdminUserInput extends PaginateRequest {
-    @Field(() => JobTypeAdmin, { nullable: true })
-    jobType?: JobTypeAdmin;
-
-    @Field(() => [JobTypeAdmin], { nullable: true })
-    jobTypes?: [JobTypeAdmin];
-}
+export class SearchAdminUserInput extends PaginateRequest {}

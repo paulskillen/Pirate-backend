@@ -1,7 +1,7 @@
 import { Field, InputType, ObjectType } from '@nestjs/graphql';
 
 @InputType()
-export class AdminLoginRequest {
+export class AdminLoginInput {
     @Field(() => String, { nullable: false })
     username: string;
 

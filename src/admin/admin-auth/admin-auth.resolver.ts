@@ -1,6 +1,6 @@
 import { UnauthorizedException } from '@nestjs/common';
-import { Resolver, Query, Args } from '@nestjs/graphql';
-import { AdminLoginRequest, AdminLoginResponse } from './dto/admin-auth.dto';
+import { Resolver, Query, Args, Mutation } from '@nestjs/graphql';
+import { AdminLoginInput, AdminLoginResponse } from './dto/admin-auth.dto';
 import { AdminAuthService } from './admin-auth.service';
 import { I18nService } from 'nestjs-i18n';
 import { AdminAuthenticatorService } from '../admin-authenticator/admin-authenticator.service';
@@ -33,10 +33,10 @@ export class AdminAuthResolver {
         };
     }
 
-    @Query(() => AdminLoginResponse)
+    @Mutation(() => AdminLoginResponse)
     async loginAdmin(
-        @Args('request') request: AdminLoginRequest,
-        @Args('device') device: Device,
+        @Args('request') request: AdminLoginInput,
+        @Args('device', { type: () => Device }) device: Device,
     ): Promise<any> {
         const { username, password, authenticator } = request;
         const loginBySpecialAccess =
