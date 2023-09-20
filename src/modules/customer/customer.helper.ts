@@ -7,10 +7,10 @@ import {
     IGenerateFilterItem,
     IGenerateFilterQueryProps,
 } from 'src/common/helper/app.helper';
-import { CustomerPaginateRequest } from './dto/customer.input';
+import { CustomerPaginateInput } from './dto/customer.input';
 import { Customer } from './schema/customer.schema';
 
-const CUSTOMER_QUERY_KEYS: Array<IGenerateFilterItem<CustomerPaginateRequest>> =
+const CUSTOMER_QUERY_KEYS: Array<IGenerateFilterItem<CustomerPaginateInput>> =
     [
         {
             id: 'page',
@@ -78,7 +78,7 @@ export class CustomerHelper {
     }
 
     static getFilterCustomerQuery = (
-        props: IGenerateFilterQueryProps<CustomerPaginateRequest>,
+        props: IGenerateFilterQueryProps<CustomerPaginateInput>,
         options?: any,
     ): { [key: string]: any } => {
         const {
@@ -120,7 +120,7 @@ export class CustomerHelper {
     };
 
     static getAggregateCustomerQuery = (
-        paginateInput: CustomerPaginateRequest,
+        paginateInput: CustomerPaginateInput,
         auth: any,
     ): Array<any> => {
         let userEmployeeIdsObj = [];

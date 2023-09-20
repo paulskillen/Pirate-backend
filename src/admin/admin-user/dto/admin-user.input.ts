@@ -6,7 +6,7 @@ import {
 } from '@nestjs/graphql';
 import { PaginateRequest } from 'src/common/paginate/dto/paginate.dto';
 import { OrderStatus } from 'src/modules/order/order.constant';
-import { JobTypeAdmin, SpecialAccessType } from '../admin-user.constant';
+import { SpecialAccessType } from '../admin-user.constant';
 
 @InputType()
 export class UpdateSpecialAccessAdminUserInput {

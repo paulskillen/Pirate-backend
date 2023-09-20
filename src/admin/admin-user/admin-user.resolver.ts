@@ -16,7 +16,7 @@ import { GqlAuthGuard } from '../admin-auth/guard/gql-auth.guard';
 import { AdminRoleService } from '../admin-role/admin-role.service';
 import { AdminUserService } from './admin-user.service';
 import {
-    AdminUser,
+    AdminUserDto,
     DetailAdminUserResponse,
     ListAdminUserResponse,
     SearchAdminUserResponse,
@@ -29,7 +29,7 @@ import {
     UpdateSpecialAccessAdminUserInput,
 } from './dto/admin-user.input';
 
-@Resolver(() => AdminUser)
+@Resolver(() => AdminUserDto)
 export class AdminUserResolver {
     constructor(
         private readonly adminUserService: AdminUserService,

@@ -52,7 +52,7 @@ export class CustomerRegisterInput {
 export class CustomerCreateInput extends CustomerRegisterInput {}
 
 @InputType()
-export class CustomerPaginateRequest extends PaginateRequest {
+export class CustomerPaginateInput extends PaginateRequest {
     @Field(() => [String], { nullable: true })
     branches?: string[];
 }

@@ -9,7 +9,7 @@ import { AppCacheServiceManager } from 'src/setting/cache/app-cache.service';
 import { PaginateHelper } from 'src/common/helper/paginate.helper';
 import { CUSTOMER_CACHE_KEY, CUSTOMER_CACHE_TTL } from './customer.constant';
 import { CustomerHelper } from './customer.helper';
-import { CustomerPaginateRequest } from './dto/customer.input';
+import { CustomerPaginateInput } from './dto/customer.input';
 import {
     Customer,
     CustomerDocument,
@@ -37,7 +37,7 @@ export class CustomerGetter {
     // ****************************** QUERY DATA ********************************//
 
     async findAll(
-        paginate: CustomerPaginateRequest,
+        paginate: CustomerPaginateInput,
         auth: any,
         otherQuery?: any,
     ): Promise<CustomerInterface> {
@@ -70,7 +70,7 @@ export class CustomerGetter {
     }
 
     async getAllByCondition(
-        paginateInput: CustomerPaginateRequest,
+        paginateInput: CustomerPaginateInput,
         auth: any,
         otherQuery?: any,
     ): Promise<Customer[]> {
