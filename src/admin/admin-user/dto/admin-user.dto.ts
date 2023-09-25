@@ -4,51 +4,14 @@ import {
     ID,
     Int,
     ObjectType,
+    PickType,
 } from '@nestjs/graphql';
 import JSON from 'graphql-type-json';
 import { AdminRole } from 'src/admin/admin-role/dto/admin-role.dto';
+import { BaseDto } from 'src/common/base/base.dto';
 import { PaginateResponse } from 'src/common/paginate/dto/paginate.dto';
 import { OrderStatus } from 'src/modules/order/order.constant';
 import { SpecialAccessType } from '../admin-user.constant';
-
-@ObjectType()
-export class AdminUserBasic {
-    @Field(() => ID, { nullable: true })
-    id?: string;
-
-    @Field(() => JSON, { nullable: true })
-    updatedAt?: Date;
-
-    @Field(() => JSON, { nullable: true })
-    createdAt?: Date;
-
-    @Field(() => Int, { nullable: true })
-    adminNo: number;
-
-    @Field(() => String, { nullable: true })
-    firstName: string;
-
-    @Field(() => String, { nullable: true })
-    lastName: string;
-
-    @Field(() => String, { nullable: true })
-    nickName: string;
-
-    @Field(() => String, { nullable: true })
-    avatar: string;
-
-    @Field(() => String, { nullable: true })
-    companyId: string;
-}
-
-@ObjectType()
-export class DefaultWorkingScheduleTime {
-    @Field(() => Number, { nullable: true })
-    start?: number;
-
-    @Field(() => Number, { nullable: true })
-    end?: number;
-}
 
 @ObjectType()
 export class SpecialAccess {
@@ -66,16 +29,7 @@ export class SpecialAccess {
 }
 
 @ObjectType()
-export class AdminUser {
-    @Field(() => ID, { nullable: true })
-    id?: string;
-
-    @Field(() => JSON, { nullable: true })
-    updatedAt?: Date;
-
-    @Field(() => JSON, { nullable: true })
-    createdAt?: Date;
-
+export class AdminUserDto extends BaseDto {
     @Field(() => Int, { nullable: true })
     adminNo: number;
 
@@ -124,18 +78,31 @@ export class AdminUser {
 
 @ObjectType()
 export class DetailAdminUserResponse {
-    @Field(() => AdminUser, { nullable: true, defaultValue: null })
-    data: AdminUser;
+    @Field(() => AdminUserDto, { nullable: true, defaultValue: null })
+    data: AdminUserDto;
 }
 
 @ObjectType()
 export class ListAdminUserResponse {
-    @Field(() => [AdminUser], { nullable: true, defaultValue: [] })
-    data: AdminUser[];
+    @Field(() => [AdminUserDto], { nullable: true, defaultValue: [] })
+    data: AdminUserDto[];
 
     @Field(() => PaginateResponse, {})
     pagination: PaginateResponse;
 }
+
+@ObjectType()
+export class AdminUserBasic extends PickType(AdminUserDto, [
+    'id',
+    'adminNo',
+    'firstName',
+    'lastName',
+    'nickName',
+    'avatar',
+    'companyId',
+    'updatedAt',
+    'createdAt',
+]) {}
 
 @ObjectType()
 export class SearchAdminUserResponse {
