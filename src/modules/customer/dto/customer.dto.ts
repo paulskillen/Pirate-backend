@@ -3,6 +3,7 @@ import JSON from 'graphql-type-json';
 import { BaseDto } from 'src/common/base/base.dto';
 import { PaginateResponse } from 'src/common/paginate/dto/paginate.dto';
 import { CustomerTitle, Gender } from '../customer.constant';
+import { CountryDto } from 'src/modules/country/dto/country.dto';
 
 @ObjectType()
 export class CustomerDto extends BaseDto {
@@ -55,6 +56,9 @@ export class CustomerDto extends BaseDto {
 
     @Field({ nullable: true })
     facebook?: string;
+
+    @Field(() => CountryDto, { nullable: true })
+    nationality?: CountryDto;
 }
 
 @ObjectType()
