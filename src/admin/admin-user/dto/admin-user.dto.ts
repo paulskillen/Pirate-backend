@@ -7,7 +7,7 @@ import {
     PickType,
 } from '@nestjs/graphql';
 import JSON from 'graphql-type-json';
-import { AdminRole } from 'src/admin/admin-role/dto/admin-role.dto';
+import { AdminRoleDto } from 'src/admin/admin-role/dto/admin-role.dto';
 import { BaseDto } from 'src/common/base/base.dto';
 import { PaginateResponse } from 'src/common/paginate/dto/paginate.dto';
 import { OrderStatus } from 'src/modules/order/order.constant';
@@ -54,8 +54,8 @@ export class AdminUserDto extends BaseDto {
     @Field(() => String, { nullable: true })
     companyId: string;
 
-    @Field(() => AdminRole, { nullable: true })
-    role: AdminRole;
+    @Field(() => AdminRoleDto, { nullable: true })
+    role: AdminRoleDto;
 
     @Field((type) => GraphQLISODateTime, { nullable: true })
     lastLogin: Date;

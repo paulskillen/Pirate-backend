@@ -15,7 +15,7 @@ import {
 } from 'src/common/paginate/dto/paginate.dto';
 
 @ObjectType()
-export class AdminRole {
+export class AdminRoleDto {
     @Field(() => ID, { nullable: true })
     id?: string;
 
@@ -60,24 +60,24 @@ export class UpdateAdminRoleRequest extends PartialType(
 
 @ObjectType()
 export class DetailAdminRoleResponse {
-    @Field(() => AdminRole, { nullable: true, defaultValue: null })
-    data: AdminRole;
+    @Field(() => AdminRoleDto, { nullable: true, defaultValue: null })
+    data: AdminRoleDto;
 }
 
 @ObjectType()
 export class ListAdminRoleResponse {
-    @Field(() => [AdminRole], { nullable: true, defaultValue: [] })
-    data: AdminRole[];
+    @Field(() => [AdminRoleDto], { nullable: true, defaultValue: [] })
+    data: AdminRoleDto[];
 
     @Field(() => PaginateResponse, {})
     pagination: PaginateResponse;
 }
 
 @InputType()
-export class ListAdminRoleRequest extends PaginateRequest {}
+export class ListAdminRoleInput extends PaginateRequest {}
 
 @ObjectType()
-export class AdminRoleBasic extends PickType(AdminRole, [
+export class AdminRoleBasic extends PickType(AdminRoleDto, [
     'id',
     'roleNo',
     'name',

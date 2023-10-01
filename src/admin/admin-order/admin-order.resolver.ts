@@ -31,7 +31,7 @@ export class AdminOrderResolver {
         @CurrentAdmin() admin: any,
     ): Promise<any> {
         const data = await this.orderService.findAll(paginate);
-        return { data };
+        return data;
     }
 
     @AdminAuthorization(PERMISSION.ORDER.DETAIL)

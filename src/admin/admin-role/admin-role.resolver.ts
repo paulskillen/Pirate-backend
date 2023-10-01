@@ -3,7 +3,7 @@ import { AdminAuthorization } from '../admin-auth/decorator/authorization.decora
 import {
     CreateAdminRoleRequest,
     UpdateAdminRoleRequest,
-    ListAdminRoleRequest,
+    ListAdminRoleInput,
     ListAdminRoleResponse,
     DetailAdminRoleResponse,
     AllAdminRoleResponse,
@@ -20,7 +20,7 @@ export class AdminRoleResolver {
     @AdminAuthorization(PERMISSION.ADMIN.ROLE.LIST)
     @Query(() => ListAdminRoleResponse)
     async listAdminRoleForAdmin(
-        @Args('paginate') paginate: ListAdminRoleRequest,
+        @Args('paginate') paginate: ListAdminRoleInput,
     ): Promise<IPaginationResult> {
         return this.adminRoleService.findAll(paginate);
     }

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { AdminRole, AdminRoleDocument } from './schemas/admin-role.schema';
 import { PaginateModel } from 'mongoose';
-import { ListAdminRoleRequest } from './dto/admin-role.dto';
+import { ListAdminRoleInput } from './dto/admin-role.dto';
 import {
     IPaginationResult,
     PaginateHelper,
@@ -32,7 +32,7 @@ export class AdminRoleService {
         return this.adminRoleModel.find({}).sort({ name: 1 });
     }
 
-    async findAll(paginate: ListAdminRoleRequest): Promise<IPaginationResult> {
+    async findAll(paginate: ListAdminRoleInput): Promise<IPaginationResult> {
         const search = PaginateHelper.getSearchRequest(paginate);
         const roles = await this.adminRoleModel.paginate(
             { ...search },
