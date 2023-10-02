@@ -3,7 +3,6 @@ import {
     ID,
     InputType,
     ObjectType,
-    GraphQLISODateTime,
     Int,
     PartialType,
     PickType,
