@@ -1,5 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { CACHE_MANAGER, Inject, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { Cache } from 'cache-manager';
 import { InjectModel } from '@nestjs/mongoose';
 import { map, some } from 'lodash';
 import { PaginateModel } from 'mongoose';
@@ -9,8 +10,12 @@ import {
     PaginateHelper,
 } from 'src/common/helper/paginate.helper';
 import { PasswordHelper } from 'src/common/helper/password.helper';
-import { WIUserProfile } from '../admin-auth/admin-auth.service';
-import { ADMIN_BASIC_KEY, SpecialAccessType } from './admin-user.constant';
+import {
+    ADMIN_BASIC_KEY,
+    ADMIN_USER_CACHE_KEY,
+    ADMIN_USER_CACHE_TTL,
+    SpecialAccessType,
+} from './admin-user.constant';
 import { EVENT_ADMIN_USER } from './admin-user.event';
 import { ADMIN_USERS_SEARCH_FIELDS } from './admin-user.helper';
 import {
@@ -19,6 +24,8 @@ import {
     BaseAdminUser,
 } from './schemas/admin-user.schema';
 import { ListAdminUserInput } from './dto/admin-user.input';
+import { AppCacheServiceManager } from 'src/setting/cache/app-cache.service';
+import { ErrorInternalException } from 'src/common/errors/errors.constant';
 
 @Injectable()
 export class AdminUserService {
@@ -26,8 +33,16 @@ export class AdminUserService {
     constructor(
         @InjectModel(AdminUser.name)
         private adminUserModel: PaginateModel<AdminUserDocument>,
+
+        @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
         private eventEmitter: EventEmitter2,
     ) {}
+
+    adminUserCache = new AppCacheServiceManager(
+        this.cacheManager,
+        ADMIN_USER_CACHE_KEY,
+        ADMIN_USER_CACHE_TTL,
+    );
 
     private hasUpdateBasicInfo(payload: any) {
         if (some(ADMIN_BASIC_KEY, (key) => !!payload?.[key])) {
@@ -193,17 +208,27 @@ export class AdminUserService {
         payload: any,
         auth: any,
     ): Promise<AdminUserDocument | undefined> {
-        const hashPasswordPayload = await this.hashPasswordInPayload(payload);
-        const res = await new this.adminUserModel({
-            ...hashPasswordPayload,
-            adminNo: await this.getNextAdminNo(),
-        }).save();
-        this.eventEmitter.emit(EVENT_ADMIN_USER.CREATE, {
-            payload: hashPasswordPayload,
-            auth,
-            data: res,
-        });
-        return res;
+        try {
+            const hashPasswordPayload = await this.hashPasswordInPayload(
+                payload,
+            );
+            const created = await new this.adminUserModel({
+                ...hashPasswordPayload,
+                adminNo: await this.getNextAdminNo(),
+            }).save();
+            if (created) {
+                this.eventEmitter.emit(EVENT_ADMIN_USER.CREATE, {
+                    payload: hashPasswordPayload,
+                    auth,
+                    data: created,
+                });
+                await this.adminUserCache.set(created);
+            }
+
+            return created;
+        } catch (error) {
+            throw ErrorInternalException(error);
+        }
     }
 
     async update(
@@ -211,94 +236,34 @@ export class AdminUserService {
         payload: any,
         auth: any,
     ): Promise<AdminUserDocument | undefined> {
-        const hashPasswordPayload = await this.hashPasswordInPayload(payload);
-        const res = await this.adminUserModel.findByIdAndUpdate(
-            id,
-            { ...hashPasswordPayload },
-            { new: true, upsert: false },
-        );
-        if (!res) {
-            return undefined;
-        }
-        this.eventEmitter.emit(EVENT_ADMIN_USER.UPDATE, {
-            payload: hashPasswordPayload,
-            auth,
-            data: res,
-        });
-        if (this.hasUpdateBasicInfo(payload)) {
-            // this.eventEmitter.emit(EVENT_ADMIN_USER.UPDATE_ADMIN_USER_BASIC, {
-            //     payload: hashPasswordPayload,
-            //     auth,
-            //     data: res,
-            // });
-        }
-        return res;
-    }
-
-    async updateUserFromWI(
-        payload: WIUserProfile,
-        auth?: any,
-    ): Promise<AdminUserDocument | undefined> {
-        const { employee_id, avatar, firstName, lastName, nickname } = payload;
-        const oldData = await this.adminUserModel.findOne({
-            companyId: employee_id,
-        });
-        if (!oldData) {
-            return undefined;
-        }
-        const {
-            firstName: oldFn,
-            lastName: oldLn,
-            nickName: oldNn,
-        } = oldData || {};
-        const res = await this.adminUserModel.findOneAndUpdate(
-            { companyId: employee_id },
-            { $set: { avatar, firstName, lastName, nickName: nickname } },
-            { new: true, upsert: false },
-        );
-        if (!res) {
-            return undefined;
-        }
-        this.logger.log('Get user information from Work Infinity X');
-        if (oldFn !== firstName || oldLn !== lastName || oldNn !== nickname) {
-            this.logger.log(
-                'Update user basic information from Work Infinity X',
-                {
-                    oldFn,
-                    oldLn,
-                    oldNn,
-                    firstName,
-                    lastName,
-                    nickname,
-                },
+        try {
+            const hashPasswordPayload = await this.hashPasswordInPayload(
+                payload,
             );
-            // this.eventEmitter.emit(EVENT_ADMIN_USER.UPDATE_ADMIN_USER_BASIC, {
-            //     payload,
-            //     auth,
-            //     data: res,
-            // });
-        }
-        return res;
-    }
+            const updated = await this.adminUserModel.findByIdAndUpdate(
+                id,
+                { ...hashPasswordPayload },
+                { new: true, upsert: false },
+            );
+            if (updated) {
+                this.eventEmitter.emit(EVENT_ADMIN_USER.UPDATE, {
+                    payload: hashPasswordPayload,
+                    auth,
+                    data: updated,
+                });
+                await this.adminUserCache.set(updated);
+            }
 
-    async addBranchToUsers(
-        branch: string,
-        users: string[],
-        auth: any,
-    ): Promise<boolean | undefined> {
-        const res = await this.adminUserModel.updateMany(
-            { _id: { $in: users } },
-            { $addToSet: { branch } },
-            { new: true, upsert: false },
-        );
-        if (!res) {
-            return undefined;
+            if (this.hasUpdateBasicInfo(payload)) {
+                // this.eventEmitter.emit(EVENT_ADMIN_USER.UPDATE_ADMIN_USER_BASIC, {
+                //     payload: hashPasswordPayload,
+                //     auth,
+                //     data: res,
+                // });
+            }
+            return updated;
+        } catch (error) {
+            throw ErrorInternalException(error);
         }
-        this.eventEmitter.emit(EVENT_ADMIN_USER.UPDATE, {
-            payload: { branch, users },
-            auth,
-            data: res,
-        });
-        return true;
     }
 }

@@ -41,6 +41,10 @@ export class AdminRoleService {
         return await PaginateHelper.getPaginationResult(roles);
     }
 
+    async findByIds(ids: string[]): Promise<AdminRoleDocument[] | undefined> {
+        return this.adminRoleModel.find({ _id: { $in: ids } }).exec();
+    }
+
     async detail(id: string): Promise<AdminRoleDocument | undefined> {
         return this.adminRoleModel.findById(id);
     }

@@ -15,15 +15,6 @@ import { ILoginResponse } from './interfaces/login.interface';
 import { AdminAuth, AdminAuthDocument } from './schemas/admin-auth.schema';
 import { EVENT_ADMIN_AUTH } from './admin-auth.event';
 
-export interface WIUserProfile {
-    id?: string;
-    employee_id?: string;
-    avatar?: string;
-    nickname?: string;
-    firstName?: string;
-    lastName?: string;
-}
-
 @Injectable()
 export class AdminAuthService {
     constructor(
