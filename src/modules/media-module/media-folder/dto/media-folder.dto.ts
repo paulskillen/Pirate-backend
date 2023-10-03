@@ -28,7 +28,7 @@ export class MediaFolderDto extends BaseDto {
 }
 
 @InputType()
-export class MediaFolderCreateRequest {
+export class MediaFolderCreateInput {
     @Field()
     name: string;
 
@@ -37,12 +37,12 @@ export class MediaFolderCreateRequest {
 }
 
 @InputType()
-export class MediaFolderUpdateRequest extends PartialType(
-    PickType(MediaFolderCreateRequest, ['name']),
+export class MediaFolderUpdateInput extends PartialType(
+    PickType(MediaFolderCreateInput, ['name']),
 ) {}
 
 @InputType()
-export class MediaFolderPaginateRequest extends PaginateRequest {
+export class MediaFolderPaginateInput extends PaginateRequest {
     @Field(() => String, { nullable: true })
     parentId?: string;
 }
