@@ -5,8 +5,9 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 import { CustomerModuleModules } from './customer-module/customer-module.module';
 import { MongoModule } from './setting/database/mongo.module';
 import { GraphQlModule } from './setting/graphql/graphql.module';
-import { AdminModule } from './admin/admin.module';
+import { AdminModules } from './admin/admin.module';
 import { i18nModule } from './i18n/i18n.module';
+import { BaseModules } from './modules/module.base';
 
 @Module({
     imports: [
@@ -24,7 +25,8 @@ import { i18nModule } from './i18n/i18n.module';
         MongoModule.config(),
         GraphQlModule.config(),
         EventEmitterModule.forRoot({ wildcard: true }),
-        AdminModule,
+        BaseModules,
+        AdminModules,
         CustomerModuleModules,
     ],
 })
