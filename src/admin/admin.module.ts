@@ -16,4 +16,4 @@ import { AdminCustomerModule } from './admin-customer/admin-customer.module';
         AdminAuthenticatorModule,
     ],
 })
-export class AdminModule {}
+export class AdminModules {}
