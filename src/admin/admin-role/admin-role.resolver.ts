@@ -17,7 +17,7 @@ import { PERMISSION } from 'src/common/constant/permission.constant';
 export class AdminRoleResolver {
     constructor(private readonly adminRoleService: AdminRoleService) {}
 
-    @AdminAuthorization(PERMISSION.ADMIN.ROLE.LIST)
+    @AdminAuthorization(PERMISSION.ADMIN.LIST)
     @Query(() => ListAdminRoleResponse)
     async listAdminRoleForAdmin(
         @Args('paginate') paginate: ListAdminRoleInput,
@@ -25,13 +25,13 @@ export class AdminRoleResolver {
         return this.adminRoleService.findAll(paginate);
     }
 
-    @AdminAuthorization(PERMISSION.ADMIN.ROLE.DETAIL)
+    @AdminAuthorization(PERMISSION.ADMIN.DETAIL)
     @Query(() => DetailAdminRoleResponse)
     async detailAdminRoleForAdmin(@Args('id') id: string): Promise<any> {
         return { data: this.adminRoleService.detail(id) };
     }
 
-    @AdminAuthorization(PERMISSION.ADMIN.ROLE.CREATE)
+    @AdminAuthorization(PERMISSION.ADMIN.CREATE)
     @Mutation(() => DetailAdminRoleResponse)
     async createAdminRoleForAdmin(
         @Args('payload') payload: CreateAdminRoleRequest,
@@ -40,7 +40,7 @@ export class AdminRoleResolver {
         return { data: this.adminRoleService.create(payload, admin) };
     }
 
-    @AdminAuthorization(PERMISSION.ADMIN.ROLE.UPDATE)
+    @AdminAuthorization(PERMISSION.ADMIN.UPDATE)
     @Mutation(() => DetailAdminRoleResponse)
     async updateAdminRoleForAdmin(
         @Args('id') id: string,
@@ -50,7 +50,7 @@ export class AdminRoleResolver {
         return { data: this.adminRoleService.update(id, payload, admin) };
     }
 
-    @AdminAuthorization(PERMISSION.ADMIN.ROLE.ALL)
+    @AdminAuthorization(PERMISSION.ADMIN.SEARCH)
     @Query(() => AllAdminRoleResponse)
     async allAdminRoleForAdmin(): Promise<any> {
         return { data: this.adminRoleService.all() };

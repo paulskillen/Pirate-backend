@@ -1,39 +1,33 @@
 export const PERMISSION = {
     COMMON: 'COMMON',
     PRODUCT: {
-        CREATE: 'PRODUCT.CREATE',
-        UPDATE: 'PRODUCT.UPDATE',
         LIST: 'PRODUCT.LIST',
         DETAIL: 'PRODUCT.DETAIL',
+        CREATE: 'PRODUCT.CREATE',
+        UPDATE: 'PRODUCT.UPDATE',
         SEARCH: 'PRODUCT.SEARCH',
     },
+    ROLE: {
+        LIST: 'ROLE.LIST',
+        DETAIL: 'ROLE.DETAIL',
+        CREATE: 'ROLE.CREATE',
+        UPDATE: 'ROLE.UPDATE',
+        SEARCH: 'ROLE.SEARCH',
+    },
+
     ADMIN: {
-        ROLE: {
-            ALL: 'ROLE.ALL',
-            LIST: 'ROLE.LIST',
-            DETAIL: 'ROLE.DETAIL',
-            CREATE: 'ROLE.CREATE',
-            UPDATE: 'ROLE.UPDATE',
-        },
-        USER: {
-            ALL: 'USER.ALL',
-            LIST: 'USER.LIST',
-            DETAIL: 'USER.DETAIL',
-            CREATE: 'USER.CREATE',
-            UPDATE: 'USER.UPDATE',
-            UPDATE_SPECIAL_ACCESS: 'UPDATE_SPECIAL_ACCESS',
-            SEARCH: 'USER.SEARCH',
-        },
+        LIST: 'USER.LIST',
+        DETAIL: 'USER.DETAIL',
+        CREATE: 'USER.CREATE',
+        UPDATE: 'USER.UPDATE',
+        SEARCH: 'USER.SEARCH',
     },
     CUSTOMER: {
         LIST: 'CUSTOMER.LIST',
-        SEARCH: 'CUSTOMER.SEARCH',
         DETAIL: 'CUSTOMER.DETAIL',
         CREATE: 'CUSTOMER.CREATE',
-        UPDATE_PERSONAL: 'CUSTOMER.UPDATE_PERSONAL',
-        UPDATE_PRIVACY: 'CUSTOMER.UPDATE_PRIVACY',
-        UPDATE_CONTACT: 'CUSTOMER.UPDATE_CONTACT',
-        UPDATE_SETTING: 'CUSTOMER.UPDATE_SETTING',
+        UPDATE: 'CUSTOMER.UPDATE',
+        SEARCH: 'CUSTOMER.SEARCH',
         ORDER_HISTORY: 'CUSTOMER.DETAIL.ORDER_HISTORY',
         VOUCHERS: 'CUSTOMER.DETAIL.VOUCHERS',
     },
@@ -65,6 +59,13 @@ export const PERMISSION = {
         CREATE: 'VOUCHER.CREATE',
         UPDATE: 'VOUCHER.UPDATE',
         CANCEL: 'VOUCHER.CANCEL',
+    },
+
+    BLOG: {
+        LIST: 'BLOG.LIST',
+        DETAIL: 'BLOG.DETAIL',
+        CREATE: 'BLOG.CREATE',
+        UPDATE: 'BLOG.UPDATE',
     },
 
     ORDER: {

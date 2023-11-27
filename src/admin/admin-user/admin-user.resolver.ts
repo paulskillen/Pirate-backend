@@ -37,7 +37,7 @@ export class AdminUserResolver {
         @Inject(CACHE_MANAGER) private cacheManager: Cache,
     ) {}
 
-    @AdminAuthorization(PERMISSION.ADMIN.USER.SEARCH)
+    @AdminAuthorization(PERMISSION.ADMIN.SEARCH)
     @Query(() => SearchAdminUserResponse)
     async searchAdminUserForAdmin(
         @Args('paginate') paginate: SearchAdminUserInput,
@@ -45,7 +45,7 @@ export class AdminUserResolver {
         return this.adminUserService.findAll(paginate);
     }
 
-    @AdminAuthorization(PERMISSION.ADMIN.USER.LIST)
+    @AdminAuthorization(PERMISSION.ADMIN.LIST)
     @Query(() => ListAdminUserResponse)
     async listAdminUserForAdmin(
         @Args('paginate') paginate: ListAdminUserInput,
@@ -59,13 +59,13 @@ export class AdminUserResolver {
         return { data: this.adminUserService.detail(admin?._id) };
     }
 
-    @AdminAuthorization(PERMISSION.ADMIN.USER.DETAIL)
+    @AdminAuthorization(PERMISSION.ADMIN.DETAIL)
     @Query(() => DetailAdminUserResponse)
     async detailAdminUserForAdmin(@Args('id') id: string): Promise<any> {
         return { data: this.adminUserService.detail(id) };
     }
 
-    @AdminAuthorization(PERMISSION.ADMIN.USER.CREATE)
+    @AdminAuthorization(PERMISSION.ADMIN.CREATE)
     @Mutation(() => DetailAdminUserResponse)
     async createAdminUserForAdmin(
         @Args('payload') payload: CreateAdminUserInput,
@@ -74,7 +74,7 @@ export class AdminUserResolver {
         return { data: this.adminUserService.create(payload, admin) };
     }
 
-    @AdminAuthorization(PERMISSION.ADMIN.USER.UPDATE)
+    @AdminAuthorization(PERMISSION.ADMIN.UPDATE)
     @Mutation(() => DetailAdminUserResponse)
     async updateAdminUserForAdmin(
         @Args('id') id: string,
@@ -84,21 +84,21 @@ export class AdminUserResolver {
         return { data: this.adminUserService.update(id, payload, admin) };
     }
 
-    @AdminAuthorization(PERMISSION.ADMIN.USER.UPDATE_SPECIAL_ACCESS)
-    @Mutation(() => DetailAdminUserResponse)
-    async updateSpecialAccessAdminUserForAdmin(
-        @Args('id') id: string,
-        @Args('payload') payload: UpdateSpecialAccessAdminUserInput,
-        @CurrentAdmin() admin: any,
-    ): Promise<any> {
-        return {
-            data: this.adminUserService.update(
-                id,
-                { specialAccess: payload },
-                admin,
-            ),
-        };
-    }
+    // @AdminAuthorization(PERMISSION.ADMIN.USER.UPDATE_SPECIAL_ACCESS)
+    // @Mutation(() => DetailAdminUserResponse)
+    // async updateSpecialAccessAdminUserForAdmin(
+    //     @Args('id') id: string,
+    //     @Args('payload') payload: UpdateSpecialAccessAdminUserInput,
+    //     @CurrentAdmin() admin: any,
+    // ): Promise<any> {
+    //     return {
+    //         data: this.adminUserService.update(
+    //             id,
+    //             { specialAccess: payload },
+    //             admin,
+    //         ),
+    //     };
+    // }
 
     @ResolveField()
     async role(@Parent() parent): Promise<any> {

@@ -1,8 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, SchemaTypes } from 'mongoose';
-import { AdminRole } from '../../admin-role/schemas/admin-role.schema';
-import { JobTypeAdmin, SpecialAccessType } from '../admin-user.constant';
 import { OrderStatus } from 'src/modules/order/order.constant';
+import { AdminRole } from '../../admin-role/schemas/admin-role.schema';
+import { SpecialAccessType } from '../admin-user.constant';
 
 @Schema({ _id: false })
 class SpecialAccess {
@@ -184,14 +184,6 @@ export class BaseAdminUser {
 
     @Prop({ type: SchemaTypes.String, required: false, default: null })
     companyId?: string;
-
-    @Prop({
-        type: SchemaTypes.String,
-        required: false,
-        default: JobTypeAdmin.NORMAL_EMPLOYEE,
-        enum: JobTypeAdmin,
-    })
-    jobType?: JobTypeAdmin;
 }
 
 export const BaseAdminUserSchema = SchemaFactory.createForClass(BaseAdminUser);
