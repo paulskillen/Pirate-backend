@@ -1,6 +1,6 @@
 import { registerEnumType } from '@nestjs/graphql';
 
-export const AWS_REGION = 'ap-southeast-1';
+export const AWS_REGION = 'us-east-1';
 export const APP_LIMITED_FILE_SIZE = 10000000;
 export const UPLOAD_FOLDER_DATE_FORMAT = 'YYYY-MM-DD';
 
@@ -16,10 +16,8 @@ registerEnumType(UploadModeStatus, {
 
 export enum UploadAuthType {
     DEFAULT = 'DEFAULT',
-    // modules
     ADMIN = 'ADMIN',
     CUSTOMER = 'CUSTOMER',
-    // other
 }
 registerEnumType(UploadAuthType, {
     name: 'UploadAuthType',
