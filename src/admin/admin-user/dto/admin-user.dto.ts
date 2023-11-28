@@ -1,32 +1,14 @@
 import {
     Field,
     GraphQLISODateTime,
-    ID,
     Int,
     ObjectType,
     PickType,
 } from '@nestjs/graphql';
-import JSON from 'graphql-type-json';
 import { AdminRoleDto } from 'src/admin/admin-role/dto/admin-role.dto';
 import { BaseDto } from 'src/common/base/base.dto';
 import { PaginateResponse } from 'src/common/paginate/dto/paginate.dto';
 import { OrderStatus } from 'src/modules/order/order.constant';
-import { SpecialAccessType } from '../admin-user.constant';
-
-@ObjectType()
-export class SpecialAccess {
-    @Field(() => Boolean, { nullable: true })
-    status: boolean;
-
-    @Field(() => String, { nullable: true })
-    code: string;
-
-    @Field(() => GraphQLISODateTime, { nullable: true })
-    expired: Date;
-
-    @Field(() => SpecialAccessType, { nullable: true })
-    specialAccessType: SpecialAccessType;
-}
 
 @ObjectType()
 export class AdminUserDto extends BaseDto {
@@ -69,9 +51,6 @@ export class AdminUserDto extends BaseDto {
     @Field(() => [OrderStatus], { nullable: true })
     orderStatusManagement: OrderStatus[];
 
-    @Field(() => SpecialAccess, { nullable: true })
-    specialAccess: SpecialAccess;
-
     @Field(() => Boolean, { nullable: true })
     status: boolean;
 }
@@ -92,7 +71,7 @@ export class ListAdminUserResponse {
 }
 
 @ObjectType()
-export class AdminUserBasic extends PickType(AdminUserDto, [
+export class AdminUserBasicDto extends PickType(AdminUserDto, [
     'id',
     'adminNo',
     'firstName',
@@ -106,8 +85,8 @@ export class AdminUserBasic extends PickType(AdminUserDto, [
 
 @ObjectType()
 export class SearchAdminUserResponse {
-    @Field(() => [AdminUserBasic], { nullable: true, defaultValue: [] })
-    data: AdminUserBasic[];
+    @Field(() => [AdminUserBasicDto], { nullable: true, defaultValue: [] })
+    data: AdminUserBasicDto[];
 
     @Field(() => PaginateResponse, {})
     pagination: PaginateResponse;
