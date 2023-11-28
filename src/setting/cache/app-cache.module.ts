@@ -16,6 +16,7 @@ import MediaFolderLoader, {
 import MediaFileLoader, {
     MediaFileLoaderType,
 } from 'src/modules/media-module/media-file/cache/media-file.loaders';
+import BlogLoader, { BlogLoaderType } from 'src/modules/blog/cache/blog.loader';
 
 const AppLoaderModule = () => ({
     ...EsimGoLoader,
@@ -24,6 +25,7 @@ const AppLoaderModule = () => ({
     ...AdminRoleLoader,
     ...MediaFolderLoader,
     ...MediaFileLoader,
+    ...BlogLoader,
 });
 
 export default AppLoaderModule;
@@ -33,4 +35,5 @@ export type AppLoaderType = EsimGoLoaderType &
     AdminUserLoaderType &
     AdminRoleLoaderType &
     MediaFileLoaderType &
+    BlogLoaderType &
     MediaFolderLoaderType;

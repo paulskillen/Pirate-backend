@@ -6,6 +6,7 @@ import { AdminAuthModule } from './admin-auth/admin-auth.module';
 import { AdminOrderModule } from './admin-order/admin-order.module';
 import { AdminCustomerModule } from './admin-customer/admin-customer.module';
 import { AdminMediaModule } from './admin-media/admin-media.module';
+import { AdminBlogModule } from './admin-blog/admin-blog.module';
 
 @Module({
     imports: [
@@ -16,6 +17,7 @@ import { AdminMediaModule } from './admin-media/admin-media.module';
         AdminCustomerModule,
         AdminAuthenticatorModule,
         AdminMediaModule,
+        AdminBlogModule,
     ],
 })
 export class AdminModules {}
