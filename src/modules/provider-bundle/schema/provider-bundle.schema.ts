@@ -10,7 +10,6 @@ import { ProviderName } from 'src/modules/provider/provider.constant';
     timestamps: true,
     toJSON: {
         transform: (doc, ret, options) => {
-            ret.id = ret._id;
             delete ret.__v;
         },
     },

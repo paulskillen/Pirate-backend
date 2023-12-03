@@ -33,7 +33,7 @@ export class AdminBlogResolver {
                 status: [BlogStatus.ACTIVE],
             },
             undefined,
-            { sort: { updatedAt: 1, _id: -1 } },
+            { sort: { updatedAt: -1, _id: -1 } },
         );
         return { data };
     }
