@@ -17,6 +17,9 @@ export class BlogCreateRequest {
     cover?: string;
 
     @Field(() => String, { nullable: true })
+    thumbnail?: string;
+
+    @Field(() => String, { nullable: true })
     category?: string;
 
     @Field(() => Boolean, { nullable: true })
@@ -30,4 +33,13 @@ export class BlogCreateRequest {
 export class BlogUpdateRequest extends PartialType(BlogCreateRequest) {}
 
 @InputType()
-export class BlogPaginateRequest extends PaginateRequest {}
+export class BlogPaginateRequest extends PaginateRequest {
+    @Field(() => [String], { nullable: true })
+    category?: string[];
+
+    @Field(() => Boolean, { nullable: true })
+    homePageVisibility?: boolean;
+
+    @Field(() => [BlogStatus], { nullable: true })
+    status?: BlogStatus[];
+}

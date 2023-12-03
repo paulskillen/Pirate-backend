@@ -35,6 +35,9 @@ export class Blog {
     cover?: string;
 
     @Prop({ type: SchemaTypes.String, required: false })
+    thumbnail?: string;
+
+    @Prop({ type: SchemaTypes.String, required: false })
     fullDesc: string;
 
     @Prop({ type: SchemaTypes.String, required: false })

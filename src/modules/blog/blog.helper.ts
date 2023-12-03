@@ -11,9 +11,20 @@ import { BlogPaginateRequest } from './dto/blog.input';
 
 const BLOG_QUERY_KEYS: Array<IGenerateFilterItem<BlogPaginateRequest>> = [
     {
-        id: 'page',
-        key: '_id',
+        id: 'status',
+        key: 'status',
         operator: '$in',
+        convertToId: false,
+    },
+    {
+        id: 'category',
+        key: 'category',
+        operator: '$in',
+        convertToId: false,
+    },
+    {
+        id: 'homePageVisibility',
+        key: 'homePageVisibility',
         convertToId: false,
     },
 ];
@@ -67,7 +78,7 @@ export class BlogHelper {
         return query;
     }
 
-    static getFilterTemplateQuery = (
+    static getFilterBlogQuery = (
         props: IGenerateFilterQueryProps<BlogPaginateRequest>,
         options?: any,
     ): { [key: string]: any } => {

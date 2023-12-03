@@ -5,15 +5,17 @@ import { CustomerCountryModule } from './customer-country/customer-country.modul
 import { CustomerESimModule } from './customer-esim/customer-esim.module';
 import { CustomerOrderModule } from './customer-order/customer-order.module';
 import { CustomerUserModule } from './customer-user/customer-user.module';
+import { CustomerBlogModule } from './customer-blog/customer-blog.module';
 
 @Module({
     imports: [
+        CustomerAuthModule,
         CustomerESimModule,
         CustomerCountryModule,
         CustomerBundleModule,
         CustomerOrderModule,
         CustomerUserModule,
-        CustomerAuthModule,
+        CustomerBlogModule,
     ],
 })
 export class CustomerModuleModules {}

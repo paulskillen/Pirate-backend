@@ -22,7 +22,10 @@ export class BlogDto extends BaseDto {
     shortDesc: string;
 
     @Field(() => String, { nullable: true })
-    cover: string;
+    cover?: string;
+
+    @Field(() => String, { nullable: true })
+    thumbnail?: string;
 
     @Field(() => String)
     category: string;
@@ -53,6 +56,8 @@ export class BlogPaginateResponse {
 export class BlogBasicDto extends PickType(BlogDto, [
     'id',
     'title',
+    'cover',
+    'thumbnail',
     'fullDesc',
     'shortDesc',
 ]) {}
