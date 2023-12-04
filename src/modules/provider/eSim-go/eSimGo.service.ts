@@ -45,6 +45,8 @@ import {
 import { ESimGoEsimData } from './schema/order/eSimGo-order.schema';
 import { EsimGoHelper } from './eSimGo.helper';
 import { isPro } from 'src/common/config/app.config';
+import { EsimGoBundlePaginateInput } from './dto/bundle/eSimGo-bundle.input';
+import { PaginateHelper } from 'src/common/helper/paginate.helper';
 
 @Injectable()
 export class ESimGoService implements OnModuleInit {
@@ -205,6 +207,18 @@ export class ESimGoService implements OnModuleInit {
     }
 
     // ****************************** BUNDLES ********************************//
+
+    async findAll(
+        paginate: EsimGoBundlePaginateInput,
+        otherQuery?: any,
+    ): Promise<any> {
+        const allData: Array<any> = await this.getListBundle();
+        const res = await PaginateHelper.getPaginationFromJson(
+            allData,
+            paginate,
+        );
+        return res;
+    }
 
     async findBundleById(id: string) {
         const bundles = (await this.getListBundle()) || [];

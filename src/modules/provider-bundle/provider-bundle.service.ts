@@ -1,11 +1,15 @@
 import { CACHE_MANAGER, Inject, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Cache } from 'cache-manager';
-import { find, forEach } from 'lodash';
+import { find, forEach, map } from 'lodash';
 import { ESimGoService } from '../provider/eSim-go/eSimGo.service';
 import { ESimGoBundle } from '../provider/eSim-go/schema/bundle/eSimGo-bundle.schema';
 import { ProviderName } from '../provider/provider.constant';
-import { ProviderBundleDto } from './dto/provider-bundle.dto';
+import {
+    ProviderBundleDto,
+    ProviderBundlePaginateResponse,
+} from './dto/provider-bundle.dto';
+import { ProviderBundlePaginateInput } from './dto/provider-bundle.input';
 
 @Injectable()
 export class ProviderBundleService {
@@ -55,8 +59,18 @@ export class ProviderBundleService {
 
     // ****************************** QUERY DATA ********************************//
 
-    async findAll(): Promise<any> {
-        return true;
+    async findAll(
+        paginate: ProviderBundlePaginateInput,
+    ): Promise<ProviderBundlePaginateResponse> {
+        const res = await this.eSimGoService.findAll(paginate);
+        return {
+            ...(res || {}),
+            data: map(
+                res?.data ?? [],
+                async (item) =>
+                    await this.mapEsimGoBundleToProviderBundle(item),
+            ),
+        };
     }
 
     async findAllFromCountry(countryCode: string): Promise<any> {

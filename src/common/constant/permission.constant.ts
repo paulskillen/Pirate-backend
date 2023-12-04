@@ -76,4 +76,12 @@ export const PERMISSION = {
         SUMMARY: 'ORDER.SUMMARY',
         CANCEL_ORDER: 'ORDER.CANCEL_ORDER',
     },
+
+    BUNDLE: {
+        LIST: 'BUNDLE.LIST',
+        DETAIL: 'BUNDLE.DETAIL',
+        CREATE: 'BUNDLE.CREATE',
+        UPDATE: 'BUNDLE.UPDATE',
+        SUMMARY: 'BUNDLE.SUMMARY',
+    },
 };
