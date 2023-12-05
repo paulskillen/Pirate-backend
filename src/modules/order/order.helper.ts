@@ -16,6 +16,12 @@ const ORDER_QUERY_KEYS: Array<IGenerateFilterItem<OrderPaginateInput>> = [
         operator: '$in',
         convertToId: false,
     },
+    {
+        id: 'status',
+        key: 'status',
+        operator: '$in',
+        convertToId: false,
+    },
 ];
 
 const ORDER_SEARCH_FIELDS: Array<string> = ['name', 'code', 'phone'];

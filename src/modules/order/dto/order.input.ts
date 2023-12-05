@@ -10,7 +10,7 @@ import {
 import JSON from 'graphql-type-json';
 import { PaginateRequest } from 'src/common/paginate/dto/paginate.dto';
 import { ProviderName } from 'src/modules/provider/provider.constant';
-import { PaymentMethod } from '../order.constant';
+import { OrderStatus, PaymentMethod } from '../order.constant';
 
 @InputType()
 export class OrderProductInput {
@@ -64,4 +64,7 @@ export class OrderProcessInput {
 }
 
 @InputType()
-export class OrderPaginateInput extends PaginateRequest {}
+export class OrderPaginateInput extends PaginateRequest {
+    @Field(() => [OrderStatus], { nullable: true })
+    status?: OrderStatus[];
+}
