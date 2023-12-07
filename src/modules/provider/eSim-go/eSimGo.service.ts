@@ -10,7 +10,7 @@ import * as fs from 'fs';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { AxiosError } from 'axios';
 import { Cache } from 'cache-manager';
-import { filter, find, forEach, includes, map, uniqBy } from 'lodash';
+import { filter, find, forEach, includes, map, some, uniqBy } from 'lodash';
 import { catchError, firstValueFrom } from 'rxjs';
 import { ErrorInternalException } from 'src/common/errors/errors.constant';
 import { Order } from 'src/modules/order/schema/order.schema';
@@ -77,6 +77,33 @@ export class ESimGoService implements OnModuleInit {
         return '0';
     }
 
+    private filterEsimGoBundles(
+        allData: Array<ESimGoBundle>,
+        paginate: EsimGoBundlePaginateInput,
+    ): any {
+        const { countries: countriesSearch, search } = paginate || {};
+        return filter(allData, (item) => {
+            const { name, countries } = item || {};
+            let isFoundName = true;
+            let isFoundCountry = true;
+            if (search) {
+                const text = search?.toLocaleLowerCase?.();
+                const countryNames = countries?.map?.((item) => item?.name);
+                isFoundName =
+                    name?.toLocaleLowerCase?.().indexOf(text) !== -1 ||
+                    some(countryNames, (name) => {
+                        return name?.toLocaleLowerCase?.().indexOf(text) !== -1;
+                    });
+            }
+            if (countriesSearch?.length) {
+                isFoundCountry = some(countries, (item) =>
+                    countriesSearch.includes(item?.iso),
+                );
+            }
+            return isFoundName && isFoundCountry;
+        });
+    }
+
     // ****************************** ESIM ********************************//
 
     async getListESimAssignedToYou(): Promise<any> {
@@ -121,10 +148,6 @@ export class ESimGoService implements OnModuleInit {
                             throw 'An error happened!';
                         }),
                     ),
-            );
-            this.logger.log(
-                '🚀 >>>>>> file: eSimGo.service.ts:87 >>>>>> ESimGoService >>>>>> getESimDataFromOrderRef >>>>>> data:',
-                data,
             );
             return data;
         } catch (error) {
@@ -212,7 +235,10 @@ export class ESimGoService implements OnModuleInit {
         paginate: EsimGoBundlePaginateInput,
         otherQuery?: any,
     ): Promise<any> {
-        const allData: Array<any> = await this.getListBundle();
+        let allData: Array<any> = await this.getListBundle();
+        if (paginate?.search || paginate?.countries) {
+            allData = this.filterEsimGoBundles(allData, paginate);
+        }
         const res = await PaginateHelper.getPaginationFromJson(
             allData,
             paginate,

@@ -10,6 +10,7 @@ import {
 import { Cache } from 'cache-manager';
 import { PERMISSION } from 'src/common/constant/permission.constant';
 import { IPaginationResult } from 'src/common/helper/paginate.helper';
+import { CountryService } from 'src/modules/country/country.service';
 import { AdminAuthorization } from '../admin-auth/decorator/authorization.decorator';
 import { CurrentAdmin } from '../admin-auth/decorator/current-admin.decorator';
 import { GqlAuthGuard } from '../admin-auth/guard/gql-auth.guard';
@@ -34,6 +35,7 @@ export class AdminUserResolver {
     constructor(
         private readonly adminUserService: AdminUserService,
         private adminRoleService: AdminRoleService,
+        private countryService: CountryService,
         @Inject(CACHE_MANAGER) private cacheManager: Cache,
     ) {}
 
@@ -56,13 +58,18 @@ export class AdminUserResolver {
     @UseGuards(GqlAuthGuard)
     @Query(() => DetailAdminUserResponse)
     async getAdminProfileForAdmin(@CurrentAdmin() admin: any): Promise<any> {
-        return { data: this.adminUserService.detail(admin?._id) };
+        return {
+            data: this.adminUserService.detail(admin?._id),
+            countries: this.countryService.findAll(),
+        };
     }
 
     @AdminAuthorization(PERMISSION.ADMIN.DETAIL)
     @Query(() => DetailAdminUserResponse)
     async detailAdminUserForAdmin(@Args('id') id: string): Promise<any> {
-        return { data: this.adminUserService.detail(id) };
+        return {
+            data: this.adminUserService.detail(id),
+        };
     }
 
     @AdminAuthorization(PERMISSION.ADMIN.CREATE)

@@ -9,6 +9,7 @@ import { AdminRoleDto } from 'src/admin/admin-role/dto/admin-role.dto';
 import { BaseDto } from 'src/common/base/base.dto';
 import { PaginateResponse } from 'src/common/paginate/dto/paginate.dto';
 import { OrderStatus } from 'src/modules/order/order.constant';
+import JSON from 'graphql-type-json';
 
 @ObjectType()
 export class AdminUserDto extends BaseDto {
@@ -59,6 +60,9 @@ export class AdminUserDto extends BaseDto {
 export class DetailAdminUserResponse {
     @Field(() => AdminUserDto, { nullable: true, defaultValue: null })
     data: AdminUserDto;
+
+    @Field(() => JSON, { nullable: true, defaultValue: [] })
+    countries: any[];
 }
 
 @ObjectType()

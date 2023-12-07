@@ -8,6 +8,7 @@ import { AdminCustomerModule } from './admin-customer/admin-customer.module';
 import { AdminMediaModule } from './admin-media/admin-media.module';
 import { AdminBlogModule } from './admin-blog/admin-blog.module';
 import { AdminBundleModule } from './admin-bundle/admin-bundle.module';
+import { AdminLocationModule } from './admin-location/admin-location.module';
 
 @Module({
     imports: [
@@ -20,6 +21,7 @@ import { AdminBundleModule } from './admin-bundle/admin-bundle.module';
         AdminMediaModule,
         AdminBlogModule,
         AdminBundleModule,
+        AdminLocationModule,
     ],
 })
 export class AdminModules {}

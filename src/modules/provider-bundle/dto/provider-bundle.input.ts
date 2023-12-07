@@ -1,15 +1,5 @@
-import {
-    Field,
-    Float,
-    GraphQLISODateTime,
-    InputType,
-    Int,
-    OmitType,
-    PartialType,
-} from '@nestjs/graphql';
-import JSON from 'graphql-type-json';
-import { PaginateRequest } from 'src/common/paginate/dto/paginate.dto';
-import { ProviderName } from 'src/modules/provider/provider.constant';
+import { InputType } from '@nestjs/graphql';
+import { EsimGoBundlePaginateInput } from 'src/modules/provider/eSim-go/dto/bundle/eSimGo-bundle.input';
 
 @InputType()
-export class ProviderBundlePaginateInput extends PaginateRequest {}
+export class ProviderBundlePaginateInput extends EsimGoBundlePaginateInput {}
