@@ -1,7 +1,10 @@
 import { CACHE_MANAGER, Inject, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { InjectModel } from '@nestjs/mongoose';
+import { PaginateModel, Types } from 'mongoose';
+import { SoftDeleteModel } from 'mongoose-delete';
 import { Cache } from 'cache-manager';
-import { find, forEach, map } from 'lodash';
+import { find, forEach, map, pick } from 'lodash';
 import { ESimGoService } from '../provider/eSim-go/eSimGo.service';
 import { ESimGoBundle } from '../provider/eSim-go/schema/bundle/eSimGo-bundle.schema';
 import { ProviderName } from '../provider/provider.constant';
@@ -9,12 +12,27 @@ import {
     ProviderBundleDto,
     ProviderBundlePaginateResponse,
 } from './dto/provider-bundle.dto';
-import { ProviderBundlePaginateInput } from './dto/provider-bundle.input';
+import {
+    BundleConfigInput,
+    ProviderBundlePaginateInput,
+} from './dto/provider-bundle.input';
+import {
+    ProviderBundle,
+    ProviderBundleDocument,
+} from './schema/provider-bundle.schema';
+import { ErrorNotFound } from 'src/common/errors/errors.constant';
 
 @Injectable()
 export class ProviderBundleService {
     constructor(
         @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
+
+        @InjectModel(ProviderBundle.name)
+        private bundleModel: PaginateModel<ProviderBundleDocument>,
+
+        @InjectModel(ProviderBundle.name)
+        private bundleSoftDeleteModel: SoftDeleteModel<ProviderBundleDocument>,
+
         private eventEmitter: EventEmitter2,
         private eSimGoService: ESimGoService,
     ) {}
@@ -58,6 +76,10 @@ export class ProviderBundleService {
     }
 
     // ****************************** QUERY DATA ********************************//
+
+    async findById(id: string) {
+        return this.bundleModel.findById(id);
+    }
 
     async findAll(
         paginate: ProviderBundlePaginateInput,
@@ -110,4 +132,31 @@ export class ProviderBundleService {
     }
 
     // ****************************** MUTATE DATA ********************************//
+
+    async updateBundleConfig(
+        refId: string,
+        payload: BundleConfigInput,
+    ): Promise<ProviderBundle> {
+        const fromProvider = await this.eSimGoService.findBundleById(refId);
+        if (!fromProvider) {
+            throw ErrorNotFound();
+        }
+        const updatePayload: Partial<ProviderBundle> = {
+            ...(pick(fromProvider, [
+                'name',
+                'description',
+                'dataAmount',
+                'duration',
+                'price',
+            ]) || {}),
+            bundleData: fromProvider,
+            config: payload,
+        };
+        const updated = await this.bundleModel.findOneAndUpdate(
+            { refId },
+            updatePayload,
+            { upsert: true, new: true },
+        );
+        return updated;
+    }
 }

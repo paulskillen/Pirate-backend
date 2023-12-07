@@ -1,12 +1,19 @@
 import { CACHE_MANAGER, Inject } from '@nestjs/common';
-import { Args, Query, Resolver } from '@nestjs/graphql';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Cache } from 'cache-manager';
 import { PERMISSION } from 'src/common/constant/permission.constant';
-import { ProviderBundlePaginateResponse } from 'src/modules/provider-bundle/dto/provider-bundle.dto';
-import { ProviderBundlePaginateInput } from 'src/modules/provider-bundle/dto/provider-bundle.input';
+import {
+    BundleDetailResponse,
+    ProviderBundlePaginateResponse,
+} from 'src/modules/provider-bundle/dto/provider-bundle.dto';
+import {
+    BundleConfigInput,
+    ProviderBundlePaginateInput,
+} from 'src/modules/provider-bundle/dto/provider-bundle.input';
 import { ProviderBundleService } from 'src/modules/provider-bundle/provider-bundle.service';
 import { AdminAuthorization } from '../admin-auth/decorator/authorization.decorator';
 import { CurrentAdmin } from '../admin-auth/decorator/current-admin.decorator';
+import { AdminUser } from '../admin-user/schemas/admin-user.schema';
 
 @Resolver()
 export class AdminBundleResolver {
@@ -29,22 +36,26 @@ export class AdminBundleResolver {
         return data;
     }
 
-    // @AdminAuthorization(PERMISSION.BUNDLE.DETAIL)
-    // @Query(() => OrderDetailResponse)
-    // async detailOrderForAdmin(@Args('id') id: string): Promise<any> {
-    //     const data = await this.providerBundleService.findById(id);
-    //     return { data };
-    // }
+    @AdminAuthorization(PERMISSION.BUNDLE.DETAIL)
+    @Query(() => BundleDetailResponse)
+    async detailBundleForAdmin(@Args('id') id: string): Promise<any> {
+        const data = await this.providerBundleService.findById(id);
+        return { data };
+    }
 
     // // ****************************** MUTATIONS ********************************//
 
-    // @AdminAuthorization(PERMISSION.BUNDLE.CREATE)
-    // @Mutation(() => OrderDetailResponse)
-    // async createOrderForAdmin(
-    //     @Args('input') input: AdminOrderCreateInput,
-    //     @CurrentAdmin() admin: AdminUser,
-    // ): Promise<any> {
-    //     const data = await this.orderService.create(input);
-    //     return { data };
-    // }
+    @AdminAuthorization(PERMISSION.BUNDLE.UPDATE)
+    @Mutation(() => BundleDetailResponse)
+    async updateBundleConfigForAdmin(
+        @Args('refId') refId: string,
+        @Args('input') input: BundleConfigInput,
+        @CurrentAdmin() admin: AdminUser,
+    ): Promise<any> {
+        const data = await this.providerBundleService.updateBundleConfig(
+            refId,
+            input,
+        );
+        return { data };
+    }
 }
