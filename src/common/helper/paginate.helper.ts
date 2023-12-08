@@ -1,6 +1,9 @@
 import { PaginateResult, AggregatePaginateResult } from 'mongoose';
 import { async } from 'rxjs';
-import { PaginateResponse } from '../paginate/dto/paginate.dto';
+import {
+    PaginateRequest,
+    PaginateResponse,
+} from '../paginate/dto/paginate.dto';
 
 export interface IPaginationResult {
     data: Array<any>;
@@ -52,6 +55,27 @@ export class PaginateHelper {
         }
         return {
             $text: { $search: search },
+        };
+    };
+
+    static getPaginationFromJson = async (
+        allData: Array<any>,
+        paginateInput: PaginateRequest,
+    ): Promise<IPaginationResult> => {
+        const pageNumber = paginateInput.page || 1;
+        const pageSize = paginateInput.limit || 20;
+        const startIndex = (pageNumber - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const items = allData?.length ?? 0;
+        const totalPages = Math.ceil(items / pageSize);
+        const data = allData.slice(startIndex, endIndex);
+        return {
+            data,
+            pagination: {
+                items,
+                page: pageNumber,
+                total: totalPages,
+            },
         };
     };
 }

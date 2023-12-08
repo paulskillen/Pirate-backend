@@ -1,0 +1,4 @@
+export const EVENT_BLOG = {
+    CREATE: 'EVENT_BLOG_CREATE',
+    UPDATE: 'EVENT_BLOG_UPDATE',
+};

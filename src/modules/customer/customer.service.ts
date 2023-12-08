@@ -18,14 +18,20 @@ import {
 } from './customer.constant';
 import { EVENT_CUSTOMER } from './customer.event';
 import { CustomerGetter } from './customer.getter';
-import { CustomerCreateInput } from './dto/customer.input';
+import {
+    CustomerCreateInput,
+    CustomerPaginateInput,
+} from './dto/customer.input';
 import {
     BaseCustomer,
     Customer,
     CustomerDocument,
+    CustomerInterface,
 } from './schema/customer.schema';
 import { AppHelper } from 'src/common/helper/app.helper';
 import { PasswordHelper } from 'src/common/helper/password.helper';
+import { CustomerHelper } from './customer.helper';
+import { PaginateHelper } from 'src/common/helper/paginate.helper';
 
 @Injectable()
 export class CustomerService {
@@ -108,6 +114,21 @@ export class CustomerService {
     }
 
     // ****************************** QUERY DATA ********************************//
+
+    async findAll(
+        paginate: CustomerPaginateInput,
+        auth?: any,
+        otherQuery?: any,
+    ): Promise<CustomerInterface> {
+        const query = CustomerHelper.getFilterCustomerQuery({
+            paginateInput: paginate,
+        });
+        if (otherQuery) {
+            Object.assign(query, otherQuery);
+        }
+        const res = await this.customerModel.paginate(query, paginate);
+        return await PaginateHelper.getPaginationResult(res);
+    }
 
     async findOne(condition: any, auth?: any): Promise<CustomerDocument> {
         return await this.customerModel.findOne(condition);
