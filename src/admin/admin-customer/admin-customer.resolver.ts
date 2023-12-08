@@ -30,7 +30,10 @@ export class AdminCustomerResolver {
         @Args('paginate') paginate: CustomerPaginateInput,
         @CurrentAdmin() admin: any,
     ): Promise<CustomerInterface> {
-        return await this.customerGetter.findAll(paginate, {});
+        return await this.customerGetter.findAll(
+            { ...paginate, sort: { _id: -1 } },
+            {},
+        );
     }
 
     @AdminAuthorization(PERMISSION.CUSTOMER.SEARCH)

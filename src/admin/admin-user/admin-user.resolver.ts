@@ -52,7 +52,10 @@ export class AdminUserResolver {
     async listAdminUserForAdmin(
         @Args('paginate') paginate: ListAdminUserInput,
     ): Promise<IPaginationResult> {
-        return this.adminUserService.findAll(paginate);
+        return this.adminUserService.findAll({
+            ...paginate,
+            sort: { _id: -1 },
+        });
     }
 
     @UseGuards(GqlAuthGuard)
