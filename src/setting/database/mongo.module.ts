@@ -24,8 +24,8 @@ export class MongoModule {
                         );
                         return connection;
                     },
-                    dbName: isPro ? 'pirate-mobile' : 'test',
-                    // dbName: 'test',
+                    // dbName: isPro ? 'pirate-mobile' : 'test',
+                    dbName: 'pirate-mobile',
                 };
             },
             inject: [ConfigService],
