@@ -21,6 +21,8 @@ import {
     ProviderBundleDocument,
 } from './schema/provider-bundle.schema';
 import { ErrorNotFound } from 'src/common/errors/errors.constant';
+import { AppCacheServiceManager } from 'src/setting/cache/app-cache.service';
+import { BUNDLE_CACHE_KEY, BUNDLE_CACHE_TTL } from './provider-bundle.constant';
 
 @Injectable()
 export class ProviderBundleService {
@@ -39,11 +41,11 @@ export class ProviderBundleService {
 
     private readonly logger = new Logger(ProviderBundleService.name);
 
-    // eSimGoCache = new AppCacheServiceManager(
-    //     this.cacheManager,
-    //     ESIM_GO_CACHE_KEY,
-    //     ESIM_GO_CACHE_TTL,
-    // );
+    bundleCache = new AppCacheServiceManager(
+        this.cacheManager,
+        BUNDLE_CACHE_KEY,
+        BUNDLE_CACHE_TTL,
+    );
 
     providers = [
         {
@@ -65,6 +67,7 @@ export class ProviderBundleService {
         const { dataAmount, price, name, duration, description } = bundle || {};
         return {
             id: name,
+            refId: name,
             name,
             provider: ProviderName.ESIM_GO,
             bundleData: bundle as any,
@@ -77,8 +80,16 @@ export class ProviderBundleService {
 
     // ****************************** QUERY DATA ********************************//
 
-    async findById(id: string) {
+    async findById(id: string): Promise<ProviderBundle> {
         return this.bundleModel.findById(id);
+    }
+
+    async findByRefId(refId: string): Promise<ProviderBundle> {
+        const cache = await this.bundleCache.get(refId);
+        if (cache) {
+            return typeof cache === 'string' ? JSON.parse(cache) : cache;
+        }
+        return await this.bundleModel.findOne({ refId });
     }
 
     async findAll(
@@ -137,9 +148,12 @@ export class ProviderBundleService {
         refId: string,
         payload: BundleConfigInput,
     ): Promise<ProviderBundle> {
+        let providerName: ProviderName | null = null;
         const fromProvider = await this.eSimGoService.findBundleById(refId);
         if (!fromProvider) {
             throw ErrorNotFound();
+        } else {
+            providerName = ProviderName.ESIM_GO;
         }
         const updatePayload: Partial<ProviderBundle> = {
             ...(pick(fromProvider, [
@@ -151,12 +165,16 @@ export class ProviderBundleService {
             ]) || {}),
             bundleData: fromProvider,
             config: payload,
+            provider: providerName,
         };
         const updated = await this.bundleModel.findOneAndUpdate(
             { refId },
             updatePayload,
             { upsert: true, new: true },
         );
+        if (updated) {
+            await this.bundleCache.set(updated, { key: refId });
+        }
         return updated;
     }
 }
