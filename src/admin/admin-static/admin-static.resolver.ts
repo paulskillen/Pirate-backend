@@ -14,7 +14,8 @@ export class AdminStaticResolver {
     @AdminAuthorization(PERMISSION.STATIC.DETAIL)
     @Query(() => StaticDetailResponse)
     async detailStaticPageForAdmin(
-        @Args('template') template: StaticPageTemplate,
+        @Args('template', { type: () => StaticPageTemplate })
+        template: StaticPageTemplate,
     ): Promise<any> {
         const data = this.staticService.findOne({ template });
         return { data };
@@ -23,7 +24,8 @@ export class AdminStaticResolver {
     @AdminAuthorization(PERMISSION.STATIC.UPDATE)
     @Mutation(() => StaticDetailResponse)
     async updateStaticPageForAdmin(
-        @Args('template') template: StaticPageTemplate,
+        @Args('template', { type: () => StaticPageTemplate })
+        template: StaticPageTemplate,
         @Args('payload') payload: StaticUpdateInput,
         @CurrentAdmin() admin: any,
     ): Promise<any> {

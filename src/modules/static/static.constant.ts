@@ -10,6 +10,7 @@ export enum StaticPageTemplate {
     COMPATIBLE_DEVICES = 'COMPATIBLE_DEVICES',
     ABOUT_US = 'ABOUT_US',
     PROMOS = 'PROMOS',
+    INSTRUCTION = 'PROMOS',
 }
 registerEnumType(StaticPageTemplate, {
     name: 'StaticPageTemplate',

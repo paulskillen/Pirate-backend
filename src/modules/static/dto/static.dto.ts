@@ -9,9 +9,6 @@ export class StaticDto extends BaseDto {
     @Field(() => StaticPageTemplate)
     template: StaticPageTemplate;
 
-    @Field()
-    name: string;
-
     @Field(() => String, { nullable: true })
     title: string;
 

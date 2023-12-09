@@ -7,8 +7,9 @@ import { StaticService } from 'src/modules/static/static.service';
 export class CustomerStaticResolver {
     constructor(private readonly staticService: StaticService) {}
     @Query(() => StaticDetailResponse)
-    async detailStaticPageForAdmin(
-        @Args('template') template: StaticPageTemplate,
+    async detailStaticPageForCustomer(
+        @Args('template', { type: () => StaticPageTemplate })
+        template: StaticPageTemplate,
     ): Promise<any> {
         const data = this.staticService.findOne({ template });
         return { data };

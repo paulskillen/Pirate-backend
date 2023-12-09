@@ -142,6 +142,7 @@ export class StaticService {
             const updated = await this.staticModel.findOneAndUpdate(
                 { template },
                 { $set: { ...input, updatedByAdmin: auth?._id } },
+                { new: true, upsert: true },
             );
             if (updated) {
                 this.eventEmitter.emit(EVENT_STATIC_PAGE.UPDATE, {
