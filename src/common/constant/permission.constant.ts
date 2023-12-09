@@ -84,4 +84,9 @@ export const PERMISSION = {
         UPDATE: 'BUNDLE.UPDATE',
         SUMMARY: 'BUNDLE.SUMMARY',
     },
+
+    STATIC: {
+        DETAIL: 'STATIC.DETAIL',
+        UPDATE: 'STATIC.UPDATE',
+    },
 };
