@@ -8,6 +8,8 @@ export enum StaticPageTemplate {
     PRIVACY_POLICY = 'PRIVACY_POLICY',
     TERM_OF_USE = 'TERM_OF_USE',
     COMPATIBLE_DEVICES = 'COMPATIBLE_DEVICES',
+    ABOUT_US = 'ABOUT_US',
+    PROMOS = 'PROMOS',
 }
 registerEnumType(StaticPageTemplate, {
     name: 'StaticPageTemplate',
