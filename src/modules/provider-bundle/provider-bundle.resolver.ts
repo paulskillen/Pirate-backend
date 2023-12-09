@@ -2,7 +2,7 @@ import { CACHE_MANAGER, Inject } from '@nestjs/common';
 import { Context, Parent, ResolveField, Resolver } from '@nestjs/graphql';
 import { Cache } from 'cache-manager';
 import { AppLoaderType } from 'src/setting/cache/app-cache.module';
-import { ProviderBundleDto } from './dto/provider-bundle.dto';
+import { BundleConfigDto, ProviderBundleDto } from './dto/provider-bundle.dto';
 import { ProviderBundleService } from './provider-bundle.service';
 import { ProviderBundle } from './schema/provider-bundle.schema';
 import JSON from 'graphql-type-json';
@@ -27,5 +27,18 @@ export class ProviderBundleDtoResolver {
             return null;
         }
         return priceSaleFormula(price);
+    }
+
+    @ResolveField(() => BundleConfigDto)
+    async config(
+        @Parent() parent: ProviderBundle,
+        @Context('loaders') loaders: AppLoaderType,
+    ): Promise<any> {
+        const { provider, name } = parent;
+        if (!name) {
+            return null;
+        }
+        const res = await this.providerBundleService.findByRefId(name);
+        return res?.config;
     }
 }

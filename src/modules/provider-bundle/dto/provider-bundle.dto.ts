@@ -8,12 +8,18 @@ import { ProviderName } from 'src/modules/provider/provider.constant';
 export class BundleConfigDto {
     @Field(() => Number, { nullable: true })
     price?: number;
+
+    @Field(() => String, { nullable: true })
+    featureImage?: string;
 }
 
 @ObjectType()
 export class ProviderBundleDto extends BaseDto {
     @Field(() => ProviderName)
     provider: ProviderName;
+
+    @Field(() => String)
+    refId: string;
 
     @Field(() => String)
     name: string;
