@@ -6,6 +6,7 @@ import { CustomerESimModule } from './customer-esim/customer-esim.module';
 import { CustomerOrderModule } from './customer-order/customer-order.module';
 import { CustomerUserModule } from './customer-user/customer-user.module';
 import { CustomerBlogModule } from './customer-blog/customer-blog.module';
+import { CustomerStaticModule } from './customer-static/customer-static.module';
 
 @Module({
     imports: [
@@ -16,6 +17,7 @@ import { CustomerBlogModule } from './customer-blog/customer-blog.module';
         CustomerOrderModule,
         CustomerUserModule,
         CustomerBlogModule,
+        CustomerStaticModule,
     ],
 })
 export class CustomerModuleModules {}
