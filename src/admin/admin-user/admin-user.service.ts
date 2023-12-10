@@ -266,4 +266,32 @@ export class AdminUserService {
             throw ErrorInternalException(error);
         }
     }
+
+    async resetPassword(
+        id: string,
+        password: string,
+        auth: any,
+    ): Promise<boolean | undefined> {
+        try {
+            const hashPassword = await PasswordHelper.hash(password);
+            const updated = await this.adminUserModel.findOneAndUpdate(
+                { _id: id },
+                { $set: { password: hashPassword } },
+                { new: true, upsert: false },
+            );
+            if (updated) {
+                this.eventEmitter.emit(EVENT_ADMIN_USER.RESET_PASSWORD, {
+                    payload: {},
+                    auth,
+                    data: updated,
+                });
+                await this.adminUserCache.set(updated);
+            } else {
+                return false;
+            }
+            return true;
+        } catch (error) {
+            throw ErrorInternalException(error);
+        }
+    }
 }

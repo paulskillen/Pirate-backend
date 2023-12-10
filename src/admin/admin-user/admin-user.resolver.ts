@@ -27,7 +27,6 @@ import {
     ListAdminUserInput,
     SearchAdminUserInput,
     UpdateAdminUserInput,
-    UpdateSpecialAccessAdminUserInput,
 } from './dto/admin-user.input';
 
 @Resolver(() => AdminUserDto)
@@ -94,21 +93,16 @@ export class AdminUserResolver {
         return { data: this.adminUserService.update(id, payload, admin) };
     }
 
-    // @AdminAuthorization(PERMISSION.ADMIN.USER.UPDATE_SPECIAL_ACCESS)
-    // @Mutation(() => DetailAdminUserResponse)
-    // async updateSpecialAccessAdminUserForAdmin(
-    //     @Args('id') id: string,
-    //     @Args('payload') payload: UpdateSpecialAccessAdminUserInput,
-    //     @CurrentAdmin() admin: any,
-    // ): Promise<any> {
-    //     return {
-    //         data: this.adminUserService.update(
-    //             id,
-    //             { specialAccess: payload },
-    //             admin,
-    //         ),
-    //     };
-    // }
+    @AdminAuthorization(PERMISSION.ADMIN.RESET_PASSWORD)
+    @Mutation(() => Boolean)
+    async resetPasswordAdminUserForAdmin(
+        @Args('id') id: string,
+        @Args('pw') pw: string,
+        @CurrentAdmin() admin: any,
+    ): Promise<any> {
+        const data = await this.adminUserService.resetPassword(id, pw, admin);
+        return data;
+    }
 
     @ResolveField()
     async role(@Parent() parent): Promise<any> {

@@ -96,10 +96,16 @@ export class AdminAuthService {
         return admin;
     }
 
+    async removeOldToken(adminId: string) {
+        await this.adminAuthModel.deleteMany({ adminId });
+        return true;
+    }
+
     private async createTokenIdAuthAdmin(payload: {
         adminId: string;
         device: Device;
     }): Promise<string> {
+        const removed = await this.removeOldToken(payload.adminId);
         const res = await this.adminAuthModel.create({
             adminId: payload.adminId,
             device: payload.device,
