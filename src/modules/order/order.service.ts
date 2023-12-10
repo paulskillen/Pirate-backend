@@ -419,9 +419,12 @@ export class OrderService {
     async create(input: OrderCreateInput, auth?: any): Promise<Order> {
         const { customer, products } = input || {};
         if (customer) {
-            const processExisting = await this.checkExistingOrder(input);
-            if (processExisting) {
-                return processExisting;
+            const foundCustomer = await this.customerService.findById(customer);
+            if (foundCustomer) {
+                const processExisting = await this.checkExistingOrder(input);
+                if (processExisting) {
+                    return processExisting;
+                }
             }
         }
         const saveData: Partial<Order> = await this.getOrderSavingPayload(

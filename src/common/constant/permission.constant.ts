@@ -20,6 +20,7 @@ export const PERMISSION = {
         DETAIL: 'USER.DETAIL',
         CREATE: 'USER.CREATE',
         UPDATE: 'USER.UPDATE',
+        RESET_PASSWORD: 'USER.RESET_PASSWORD',
         SEARCH: 'USER.SEARCH',
     },
     CUSTOMER: {
@@ -83,5 +84,10 @@ export const PERMISSION = {
         CREATE: 'BUNDLE.CREATE',
         UPDATE: 'BUNDLE.UPDATE',
         SUMMARY: 'BUNDLE.SUMMARY',
+    },
+
+    STATIC: {
+        DETAIL: 'STATIC.DETAIL',
+        UPDATE: 'STATIC.UPDATE',
     },
 };
