@@ -267,6 +267,38 @@ export class AdminUserService {
         }
     }
 
+    async updateLastLogin(
+        id: string,
+        date?: Date,
+    ): Promise<AdminUserDocument | undefined> {
+        try {
+            const updated = await this.adminUserModel.findOneAndUpdate(
+                { _id: id },
+                { $set: { lastLogin: date || new Date() } },
+                { new: true, upsert: false },
+            );
+            return updated;
+        } catch (error) {
+            throw ErrorInternalException(error);
+        }
+    }
+
+    async updateLastActive(
+        id: string,
+        date?: Date,
+    ): Promise<AdminUserDocument | undefined> {
+        try {
+            const updated = await this.adminUserModel.findOneAndUpdate(
+                { _id: id },
+                { $set: { lastActive: date || new Date() } },
+                { new: true, upsert: false },
+            );
+            return updated;
+        } catch (error) {
+            throw ErrorInternalException(error);
+        }
+    }
+
     async resetPassword(
         id: string,
         password: string,

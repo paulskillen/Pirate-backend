@@ -112,7 +112,7 @@ export class AdminAuthService {
             expiresIn: this.getNextTimeExpiresTokenId(),
         });
         this.eventEmitter.emit(EVENT_ADMIN_AUTH.CREATE, {
-            payload: res,
+            data: res,
         });
         return res._id;
     }
@@ -126,7 +126,8 @@ export class AdminAuthService {
         if (!admin) {
             return { accessToken: null };
         }
-        return await this.getAccessToken(admin, device);
+        const res = await this.getAccessToken(admin, device);
+        return res;
     }
 
     async loginByCompanyId(

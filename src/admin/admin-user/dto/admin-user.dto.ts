@@ -41,7 +41,10 @@ export class AdminUserDto extends BaseDto {
     role: AdminRoleDto;
 
     @Field((type) => GraphQLISODateTime, { nullable: true })
-    lastLogin: Date;
+    lastLogin?: Date;
+
+    @Field((type) => GraphQLISODateTime, { nullable: true })
+    lastActive?: Date;
 
     @Field(() => Boolean, { nullable: true })
     authenticationStatus: boolean;

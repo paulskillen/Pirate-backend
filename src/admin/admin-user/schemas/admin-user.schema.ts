@@ -115,6 +115,9 @@ export class AdminUser {
 
     @Prop({ type: SchemaTypes.Date, required: false, default: null })
     lastLogin: Date;
+
+    @Prop({ type: SchemaTypes.Date, required: false, default: null })
+    lastActive: Date;
 }
 export const AdminUserSchema = SchemaFactory.createForClass(AdminUser);
 AdminUserSchema.index({ adminNo: -1 });

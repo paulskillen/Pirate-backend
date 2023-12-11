@@ -6,6 +6,7 @@ import { AdminUserService } from './admin-user.service';
 import { AdminAuthModule } from '../admin-auth/admin-auth.module';
 import { AdminRoleModule } from '../admin-role/admin-role.module';
 import { CountryModule } from 'src/modules/country/country.module';
+import { AdminUserListener } from './listener/admin-user.listener';
 
 @Module({
     imports: [
@@ -16,7 +17,7 @@ import { CountryModule } from 'src/modules/country/country.module';
         AdminRoleModule,
         CountryModule,
     ],
-    providers: [AdminUserResolver, AdminUserService],
+    providers: [AdminUserResolver, AdminUserService, AdminUserListener],
     exports: [AdminUserService],
 })
 export class AdminUserModule {}
