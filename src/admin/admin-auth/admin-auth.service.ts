@@ -112,7 +112,7 @@ export class AdminAuthService {
             expiresIn: this.getNextTimeExpiresTokenId(),
         });
         this.eventEmitter.emit(EVENT_ADMIN_AUTH.CREATE, {
-            payload: res,
+            data: res,
         });
         return res._id;
     }

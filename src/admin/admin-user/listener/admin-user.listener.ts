@@ -26,13 +26,11 @@ export class AdminUserListener {
 
     @OnEvent(EVENT_ADMIN_AUTH.NEW_QUERY, { async: true })
     async listenerAdminAuthNewQueryEvent(payload: {
-        auth: any;
         data: AdminAuth;
-        input?: any;
     }): Promise<boolean> {
-        const { data } = payload || {};
-        if (data?.adminId) {
-            await this.adminUserService.updateLastActive(data?.adminId);
+        const { adminId } = payload?.data || {};
+        if (adminId) {
+            await this.adminUserService.updateLastActive(adminId);
         }
         return true;
     }

@@ -38,7 +38,9 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'adminStrategy') {
                 await this.i18nService.t('admin.auth.account.invalid'),
             );
         }
-        this.eventEmitter.emit(EVENT_ADMIN_AUTH.NEW_QUERY, { payload: token });
+        this.eventEmitter.emit(EVENT_ADMIN_AUTH.NEW_QUERY, {
+            data: token?.toObject?.(),
+        });
         return { ...admin, authType: 'Admin' };
     }
 }
