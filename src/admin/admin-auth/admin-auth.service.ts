@@ -126,7 +126,8 @@ export class AdminAuthService {
         if (!admin) {
             return { accessToken: null };
         }
-        return await this.getAccessToken(admin, device);
+        const res = await this.getAccessToken(admin, device);
+        return res;
     }
 
     async loginByCompanyId(
