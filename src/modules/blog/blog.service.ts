@@ -93,6 +93,10 @@ export class BlogService {
         return await this.blogModel.findById(id).exec();
     }
 
+    async findBySlug(slug: string): Promise<Blog> {
+        return await this.blogModel.findOne({ slug }).exec();
+    }
+
     async findByIds(ids: string[]): Promise<Blog[] | undefined> {
         return this.blogModel.find({ _id: { $in: ids } }).exec();
     }

@@ -20,8 +20,8 @@ export class AdminBlogResolver {
     }
 
     @Query(() => BlogDetailResponse)
-    async detailBlogForCustomer(@Args('id') id: string): Promise<any> {
-        const data = this.blogService.findById(id);
+    async detailBlogForCustomer(@Args('slug') slug: string): Promise<any> {
+        const data = this.blogService.findBySlug(slug);
         return { data };
     }
 
