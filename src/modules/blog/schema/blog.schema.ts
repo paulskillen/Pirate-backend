@@ -28,6 +28,9 @@ export class Blog {
     })
     status: BlogStatus;
 
+    @Prop({ type: SchemaTypes.String, required: true, unique: true })
+    slug: string;
+
     @Prop({ type: SchemaTypes.String, required: false })
     title: string;
 

@@ -13,6 +13,9 @@ export class BlogDto extends BaseDto {
     status: BlogStatus;
 
     @Field(() => String)
+    slug: string;
+
+    @Field(() => String)
     title: string;
 
     @Field(() => String)

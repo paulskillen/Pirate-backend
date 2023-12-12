@@ -5,6 +5,9 @@ import { BlogStatus } from '../blog.constant';
 @InputType()
 export class BlogCreateRequest {
     @Field()
+    slug: string;
+
+    @Field()
     title: string;
 
     @Field()
