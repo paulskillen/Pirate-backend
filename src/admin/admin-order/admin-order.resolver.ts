@@ -30,7 +30,10 @@ export class AdminOrderResolver {
         @Args('paginate') paginate: OrderPaginateInput,
         @CurrentAdmin() admin: any,
     ): Promise<any> {
-        const data = await this.orderService.findAll(paginate);
+        const data = await this.orderService.findAll({
+            ...paginate,
+            sort: { createdAt: -1, _id: -1 },
+        });
         return data;
     }
 
