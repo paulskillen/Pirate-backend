@@ -4,14 +4,14 @@ const serviceFee = 1.3;
 
 const marginFactor = 2;
 
-export const priceSaleFormula = (price: string | number) => {
+export const priceSaleFormula = (price: string | number): any => {
     const calPrice = typeof price === 'string' ? +price : price;
     if (Number.isNaN(calPrice)) {
         return null;
     }
     const marginBase = marginFactor * calPrice + 0;
     const priceBase: number = marginBase;
-    const priceCharged = +(Math.ceil(priceBase) - 0.01).toFixed(2);
+    const priceCharged = (Math.ceil(priceBase) - 0.01).toFixed(2);
     // if (priceBase > 0 && priceBase <= 5) {
     //     priceCharged = 4.99;
     // } else if (priceBase > 5 && priceBase <= 10) {
@@ -35,5 +35,5 @@ export const priceSaleFormula = (price: string | number) => {
     // } else if (priceBase > 50) {
     //     priceCharged = priceBase.toFixed(2);
     // }
-    return priceCharged;
+    return priceCharged as any;
 };
