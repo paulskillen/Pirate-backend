@@ -3,6 +3,6 @@ import { LanguageType } from './i18n.constant';
 
 @ObjectType()
 export class TranslationDto {
-  @Field(() => LanguageType)
-  language: LanguageType;
+    @Field(() => LanguageType)
+    language: LanguageType;
 }

@@ -1,38 +1,52 @@
+import { HttpService } from '@nestjs/axios';
 import {
     CACHE_MANAGER,
-    forwardRef,
     Inject,
     Injectable,
     Logger,
     OnModuleInit,
 } from '@nestjs/common';
+import * as fs from 'fs';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { HttpService } from '@nestjs/axios';
-import { catchError, firstValueFrom } from 'rxjs';
+import { AxiosError } from 'axios';
 import { Cache } from 'cache-manager';
+import { filter, find, forEach, includes, map, some, uniqBy } from 'lodash';
+import { catchError, firstValueFrom } from 'rxjs';
+import { ErrorInternalException } from 'src/common/errors/errors.constant';
+import { Order } from 'src/modules/order/schema/order.schema';
 import { AppCacheServiceManager } from 'src/setting/cache/app-cache.service';
+import {
+    ESIM_GO_APPLY_BUNDLE_TO_ESIM,
+    ESIM_GO_GET_ESIM_FROM_ORDER_REF,
+    ESIM_GO_GET_ESIM_QR_CODE_IMG,
+    ESIM_GO_LIST_BUNDLES,
+    ESIM_GO_LIST_BUNDLES_APPLIED_TO_ESIM,
+    ESIM_GO_LIST_ESIM_ASSIGNED_TO_YOU,
+    ESIM_GO_PROCESS_ORDERS,
+    ESIM_GO_SEND_SMS_TO_ESIM,
+} from './apis/eSimGo.api';
+import {
+    ESimGoApplyBundleToEsimInput,
+    ESimGoOrderInput,
+} from './dto/order/eSimGo-order.dto';
 import {
     ESIM_GO_API_HEADER,
     ESIM_GO_BUNDLES_CACHE_KEY,
     ESIM_GO_BUNDLES_CACHE_TTL,
     ESIM_GO_CACHE_KEY,
     ESIM_GO_CACHE_TTL,
+    ESIM_GO_MOCKUP_ORDER,
+    ESIM_GO_SUPPORTED_COUNTRIES_CACHE_KEY,
 } from './eSimGo.constant';
-import { AppHelper } from 'src/common/helper/app.helper';
 import {
-    ESIM_GO_GET_ESIM_FROM_ORDER_REF,
-    ESIM_GO_GET_ESIM_QR_CODE_IMG,
-    ESIM_GO_LIST_BUNDLES,
-    ESIM_GO_LIST_ESIM_ASSIGNED_TO_YOU,
-    ESIM_GO_PROCESS_ORDERS,
-} from './apis/eSimGo.api';
-import { AxiosError } from 'axios';
-import { filter, find, includes, map } from 'lodash';
-import { ESimGoBundle } from './schema/bundle/eSimGo-bundle.schema';
-import { ESimGoOrderInput } from './dto/order/eSimGo-order.dto';
-import { ErrorInternalException } from 'src/common/errors/errors.constant';
-import { Order } from 'src/modules/order/schema/order.schema';
+    ESimGoBundle,
+    ESimGoBundleCountry,
+} from './schema/bundle/eSimGo-bundle.schema';
 import { ESimGoEsimData } from './schema/order/eSimGo-order.schema';
+import { EsimGoHelper } from './eSimGo.helper';
+import { isPro } from 'src/common/config/app.config';
+import { EsimGoBundlePaginateInput } from './dto/bundle/eSimGo-bundle.input';
+import { PaginateHelper } from 'src/common/helper/paginate.helper';
 
 @Injectable()
 export class ESimGoService implements OnModuleInit {
@@ -61,6 +75,33 @@ export class ESimGoService implements OnModuleInit {
 
     private async getNextNo(): Promise<string> {
         return '0';
+    }
+
+    private filterEsimGoBundles(
+        allData: Array<ESimGoBundle>,
+        paginate: EsimGoBundlePaginateInput,
+    ): any {
+        const { countries: countriesSearch, search } = paginate || {};
+        return filter(allData, (item) => {
+            const { name, countries } = item || {};
+            let isFoundName = true;
+            let isFoundCountry = true;
+            if (search) {
+                const text = search?.toLocaleLowerCase?.();
+                const countryNames = countries?.map?.((item) => item?.name);
+                isFoundName =
+                    name?.toLocaleLowerCase?.().indexOf(text) !== -1 ||
+                    some(countryNames, (name) => {
+                        return name?.toLocaleLowerCase?.().indexOf(text) !== -1;
+                    });
+            }
+            if (countriesSearch?.length) {
+                isFoundCountry = some(countries, (item) =>
+                    countriesSearch.includes(item?.iso),
+                );
+            }
+            return isFoundName && isFoundCountry;
+        });
     }
 
     // ****************************** ESIM ********************************//
@@ -107,10 +148,6 @@ export class ESimGoService implements OnModuleInit {
                             throw 'An error happened!';
                         }),
                     ),
-            );
-            this.logger.log(
-                '🚀 >>>>>> file: eSimGo.service.ts:87 >>>>>> ESimGoService >>>>>> getESimDataFromOrderRef >>>>>> data:',
-                data,
             );
             return data;
         } catch (error) {
@@ -159,14 +196,62 @@ export class ESimGoService implements OnModuleInit {
         return { ...esimData, qrCode };
     }
 
+    async sendSmsToAnESim(
+        iccid: string,
+        payload?: any,
+    ): Promise<ESimGoEsimData[]> {
+        try {
+            const { data } = await firstValueFrom(
+                this.httpService
+                    .post(
+                        ESIM_GO_SEND_SMS_TO_ESIM(iccid),
+                        {
+                            message: 'Form Pirate Mobile with love♥︎ !',
+                            from: 'eSIM',
+                            ...(payload || {}),
+                        },
+                        {
+                            headers: { ...ESIM_GO_API_HEADER },
+                        },
+                    )
+                    .pipe(
+                        catchError((error: AxiosError) => {
+                            this.logger.error(error.response.data);
+                            throw ErrorInternalException(error?.message);
+                        }),
+                    ),
+            );
+            return data;
+        } catch (error) {
+            this.logger.error('getESimDataFromOrderRef Error', {
+                error,
+            });
+        }
+    }
+
     // ****************************** BUNDLES ********************************//
+
+    async findAll(
+        paginate: EsimGoBundlePaginateInput,
+        otherQuery?: any,
+    ): Promise<any> {
+        let allData: Array<any> = await this.getListBundle();
+        if (paginate?.search || paginate?.countries) {
+            allData = this.filterEsimGoBundles(allData, paginate);
+        }
+        const res = await PaginateHelper.getPaginationFromJson(
+            allData,
+            paginate,
+        );
+        return res;
+    }
 
     async findBundleById(id: string) {
         const bundles = (await this.getListBundle()) || [];
         return find(bundles, (item) => item?.name === id);
     }
 
-    async getListBundle(): Promise<ESimGoBundle[]> {
+    async getListBundle(isGoldBundle = true): Promise<ESimGoBundle[]> {
         let page = 0;
         let pageCount = 1;
         let allData: Array<any> = await this.eSimGoCache.get(
@@ -180,7 +265,11 @@ export class ESimGoService implements OnModuleInit {
                     this.httpService
                         .get(ESIM_GO_LIST_BUNDLES, {
                             headers: { ...ESIM_GO_API_HEADER },
-                            params: { perPage: 100, page },
+                            params: {
+                                perPage: 100,
+                                page,
+                                // groups: 'Gold eSIM Bundles',
+                            },
                         })
                         .pipe(
                             catchError((error: AxiosError) => {
@@ -189,6 +278,7 @@ export class ESimGoService implements OnModuleInit {
                             }),
                         ),
                 );
+
                 if (data?.pageCount) {
                     pageCount = data?.pageCount;
                 }
@@ -197,11 +287,32 @@ export class ESimGoService implements OnModuleInit {
                 }
             }
             try {
+                // const listJson = JSON.stringify(allData);
+                // await fs.writeFileSync('src/asset/json/data.json', listJson);
+
                 await this.eSimGoCache.set(allData, {
                     key: ESIM_GO_BUNDLES_CACHE_KEY,
                     useStringify: false,
                     ttl: ESIM_GO_BUNDLES_CACHE_TTL,
                 });
+
+                const supportedCountries: Array<ESimGoBundleCountry> = [];
+                forEach(allData, (item) => {
+                    if (item?.countries && item?.countries?.length > 0) {
+                        forEach(item?.countries ?? [], (country) => {
+                            supportedCountries.push(country);
+                        });
+                    }
+                });
+                if (supportedCountries?.length > 0) {
+                    const filteredCountries: Array<ESimGoBundleCountry> =
+                        uniqBy(supportedCountries, (item) => item?.iso);
+                    await this.eSimGoCache.set(filteredCountries, {
+                        key: ESIM_GO_SUPPORTED_COUNTRIES_CACHE_KEY,
+                        useStringify: true,
+                        ttl: ESIM_GO_BUNDLES_CACHE_TTL,
+                    });
+                }
             } catch (error) {
                 this.logger.error(
                     'Get list bundles from EsimGo  failed with error',
@@ -211,8 +322,40 @@ export class ESimGoService implements OnModuleInit {
                 );
             }
         }
+        let filteredData: Array<any> = [...(allData || [])];
 
-        return allData;
+        if (allData?.length > 0 && isGoldBundle) {
+            filteredData = filter(allData, (item) =>
+                EsimGoHelper.checkIsGoldBundle(item),
+            );
+        }
+
+        return filteredData;
+    }
+
+    async getListBundleAppliedToEsim(iccid: string): Promise<ESimGoBundle[]> {
+        try {
+            const { data } = await firstValueFrom(
+                this.httpService
+                    .get(ESIM_GO_LIST_BUNDLES_APPLIED_TO_ESIM(iccid), {
+                        headers: { ...ESIM_GO_API_HEADER },
+                    })
+                    .pipe(
+                        catchError((error: AxiosError) => {
+                            this.logger.error(error.response.data);
+                            throw ErrorInternalException(error?.message);
+                        }),
+                    ),
+            );
+            return data;
+        } catch (error) {
+            this.logger.error(
+                'Get list bundle applied to eSim failed with error',
+                {
+                    error,
+                },
+            );
+        }
     }
 
     async getListBundleFromCountry(
@@ -228,13 +371,11 @@ export class ESimGoService implements OnModuleInit {
         return data;
     }
 
-    // ****************************** ORDERS ********************************//
-
-    async createOrder(payload: ESimGoOrderInput): Promise<any> {
+    async applyBundleEsim(payload: ESimGoApplyBundleToEsimInput): Promise<any> {
         try {
             const { data } = await firstValueFrom(
                 this.httpService
-                    .post(ESIM_GO_PROCESS_ORDERS, payload, {
+                    .post(ESIM_GO_APPLY_BUNDLE_TO_ESIM, payload, {
                         headers: { ...ESIM_GO_API_HEADER },
                     })
                     .pipe(
@@ -246,6 +387,32 @@ export class ESimGoService implements OnModuleInit {
             );
 
             return data;
+        } catch (error) {
+            this.logger.error('Create EsimGo order failed with error', {
+                error,
+            });
+        }
+    }
+
+    // ****************************** ORDERS ********************************//
+
+    async createOrder(payload: ESimGoOrderInput): Promise<any> {
+        try {
+            if (isPro) {
+                const { data } = await firstValueFrom(
+                    this.httpService
+                        .post(ESIM_GO_PROCESS_ORDERS, payload, {
+                            headers: { ...ESIM_GO_API_HEADER },
+                        })
+                        .pipe(
+                            catchError((error: AxiosError) => {
+                                this.logger.error(error.response.data);
+                                throw ErrorInternalException(error?.message);
+                            }),
+                        ),
+                );
+                return data;
+            } else return ESIM_GO_MOCKUP_ORDER;
         } catch (error) {
             this.logger.error('Create EsimGo order failed with error', {
                 error,

@@ -11,7 +11,7 @@ import { PaginateRequest } from 'src/common/paginate/dto/paginate.dto';
 @InputType()
 export class LoginInput {
     @Field()
-    username: string;
+    email: string;
 
     @Field()
     password: string;

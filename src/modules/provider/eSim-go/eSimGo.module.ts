@@ -2,6 +2,7 @@ import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
 import { ESimGoResolver } from './eSimGo.resolver';
 import { ESimGoService } from './eSimGo.service';
+import { ESimGoSchedule } from './schedule/eSimGo.schedule';
 
 @Module({
     imports: [
@@ -10,7 +11,7 @@ import { ESimGoService } from './eSimGo.service';
             maxRedirects: 10,
         }),
     ],
-    providers: [ESimGoService, ESimGoResolver],
+    providers: [ESimGoService, ESimGoResolver, ESimGoSchedule],
     exports: [ESimGoService, ESimGoResolver],
 })
 export class ESimGoModule {}

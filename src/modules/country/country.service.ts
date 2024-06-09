@@ -1,22 +1,12 @@
-import {
-    CACHE_MANAGER,
-    forwardRef,
-    Inject,
-    Injectable,
-    Logger,
-} from '@nestjs/common';
-import * as countryData from './json/country-full.json';
+import { CACHE_MANAGER, Inject, Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { HttpService } from '@nestjs/axios';
 import { Cache } from 'cache-manager';
 import { AppCacheServiceManager } from 'src/setting/cache/app-cache.service';
-// import {
-//     ESimGoApiHeader,
-//     ESIM_GO_CACHE_KEY,
-//     ESIM_GO_CACHE_TTL,
-// } from './eSimGo.constant';
-import { AppHelper } from 'src/common/helper/app.helper';
-import { AxiosError } from 'axios';
+import * as countryData from './json/country-full.json';
+import { filter, map } from 'lodash';
+import { ESIM_GO_SUPPORTED_COUNTRIES_CACHE_KEY } from '../provider/eSim-go/eSimGo.constant';
+import { ESimGoBundleCountry } from '../provider/eSim-go/schema/bundle/eSimGo-bundle.schema';
+import { COUNTRY_CACHE_KEY, COUNTRY_CACHE_TTL } from './country.constant';
 
 @Injectable()
 export class CountryService {
@@ -27,11 +17,11 @@ export class CountryService {
 
     private readonly logger = new Logger(CountryService.name);
 
-    // eSimGoCache = new AppCacheServiceManager(
-    //     this.cacheManager,
-    //     ESIM_GO_CACHE_KEY,
-    //     ESIM_GO_CACHE_TTL,
-    // );
+    countryCache = new AppCacheServiceManager(
+        this.cacheManager,
+        COUNTRY_CACHE_KEY,
+        COUNTRY_CACHE_TTL,
+    );
 
     // ****************************** UTIL METHOD ********************************//
 
@@ -42,6 +32,20 @@ export class CountryService {
     // ****************************** ESIM ********************************//
 
     async findAll(): Promise<any> {
+        const supportedCountries = await this.countryCache.get(
+            ESIM_GO_SUPPORTED_COUNTRIES_CACHE_KEY,
+        );
+        if (supportedCountries) {
+            const parsedData: Array<ESimGoBundleCountry> =
+                JSON.parse(supportedCountries);
+            if (parsedData && parsedData?.length > 0) {
+                const supportedIso = map(parsedData, (item) => item?.iso);
+                const filteredCountries = filter(countryData, (item) =>
+                    supportedIso.includes(item?.iso),
+                );
+                return filteredCountries;
+            }
+        }
         return countryData;
     }
     // ****************************** MUTATE DATA ********************************//

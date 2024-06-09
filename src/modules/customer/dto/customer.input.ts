@@ -1,13 +1,6 @@
-import {
-    Field,
-    GraphQLISODateTime,
-    InputType,
-    OmitType,
-    PartialType,
-    PickType,
-} from '@nestjs/graphql';
+import { Field, GraphQLISODateTime, InputType } from '@nestjs/graphql';
 import { PaginateRequest } from 'src/common/paginate/dto/paginate.dto';
-import { CustomerTitle, Gender } from '../customer.constant';
+import { CustomerTitle } from '../customer.constant';
 
 @InputType()
 export class CustomerRegisterInput {
@@ -15,7 +8,6 @@ export class CustomerRegisterInput {
     avatar?: string;
 
     // personal information
-
     @Field(() => CustomerTitle)
     title: CustomerTitle;
 
@@ -31,14 +23,17 @@ export class CustomerRegisterInput {
     @Field()
     password: string;
 
+    @Field(() => GraphQLISODateTime, { nullable: true })
+    birthDay?: Date;
+
     @Field({ nullable: true })
     phoneCode?: string;
 
     @Field({ nullable: true })
-    socialId?: string;
+    phone?: string;
 
     @Field({ nullable: true })
-    phone?: string;
+    socialId?: string;
 
     // privacy information
     @Field(() => String, { nullable: true })
@@ -49,7 +44,7 @@ export class CustomerRegisterInput {
 export class CustomerCreateInput extends CustomerRegisterInput {}
 
 @InputType()
-export class CustomerPaginateRequest extends PaginateRequest {
+export class CustomerPaginateInput extends PaginateRequest {
     @Field(() => [String], { nullable: true })
     branches?: string[];
 }

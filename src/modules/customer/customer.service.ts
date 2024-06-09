@@ -2,7 +2,7 @@ import { CACHE_MANAGER, forwardRef, Inject, Injectable } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { InjectModel } from '@nestjs/mongoose';
 import { Cache } from 'cache-manager';
-import { map } from 'lodash';
+import { isEmpty, map } from 'lodash';
 import * as moment from 'moment';
 import { PaginateModel } from 'mongoose';
 import { SoftDeleteModel } from 'mongoose-delete';
@@ -18,14 +18,20 @@ import {
 } from './customer.constant';
 import { EVENT_CUSTOMER } from './customer.event';
 import { CustomerGetter } from './customer.getter';
-import { CustomerCreateInput } from './dto/customer.input';
+import {
+    CustomerCreateInput,
+    CustomerPaginateInput,
+} from './dto/customer.input';
 import {
     BaseCustomer,
     Customer,
     CustomerDocument,
+    CustomerInterface,
 } from './schema/customer.schema';
 import { AppHelper } from 'src/common/helper/app.helper';
 import { PasswordHelper } from 'src/common/helper/password.helper';
+import { CustomerHelper } from './customer.helper';
+import { PaginateHelper } from 'src/common/helper/paginate.helper';
 
 @Injectable()
 export class CustomerService {
@@ -109,6 +115,25 @@ export class CustomerService {
 
     // ****************************** QUERY DATA ********************************//
 
+    async findAll(
+        paginate: CustomerPaginateInput,
+        auth?: any,
+        otherQuery?: any,
+    ): Promise<CustomerInterface> {
+        const query = CustomerHelper.getFilterCustomerQuery({
+            paginateInput: paginate,
+        });
+        if (otherQuery) {
+            Object.assign(query, otherQuery);
+        }
+        const res = await this.customerModel.paginate(query, paginate);
+        return await PaginateHelper.getPaginationResult(res);
+    }
+
+    async findOne(condition: any, auth?: any): Promise<CustomerDocument> {
+        return await this.customerModel.findOne(condition);
+    }
+
     async findByIds(ids: string[]): Promise<Customer[] | undefined> {
         return this.customerModel.find({ _id: { $in: ids } }).exec();
     }
@@ -118,7 +143,7 @@ export class CustomerService {
     }
 
     async login(username: string): Promise<Customer> {
-        return this.customerModel
+        return await this.customerModel
             .findOneAndUpdate(
                 { $or: [{ email: username }] },
                 { $set: { lastLogin: new Date() } },
@@ -145,12 +170,24 @@ export class CustomerService {
     async create(input: CustomerCreateInput, auth?: any): Promise<Customer> {
         const customerNo = await this.getNextNo();
         if (!customerNo) {
-            throw Error('Something went wrong! Can not create Customer No !');
+            throw ErrorInternalException(
+                'Something went wrong! Can not create Customer No !',
+            );
+        }
+        const foundUser = await this.customerModel.find({
+            email: input?.email,
+        });
+        if (!isEmpty(foundUser)) {
+            throw ErrorNotFound(
+                'Email address is already registered, please login instead !',
+            );
         }
         const saveData: Partial<Customer> = {
             ...input,
             customerNo,
-            password: await PasswordHelper.hash(input.password),
+            password: input.password
+                ? await PasswordHelper.hash(input.password)
+                : undefined,
         } as unknown as Customer;
         // if (auth?._id) {
         //   Object.assign(saveData, { createByAdmin: auth._id });

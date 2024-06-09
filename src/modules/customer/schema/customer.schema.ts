@@ -71,6 +71,9 @@ export class BaseCustomer {
 
     @Prop({ type: SchemaTypes.String, required: false })
     phone?: string;
+
+    @Prop({ type: SchemaTypes.ObjectId, required: false, default: null })
+    nationality?: string;
 }
 
 @Schema({

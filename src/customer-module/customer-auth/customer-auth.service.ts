@@ -5,6 +5,8 @@ import { AuthenticationError } from 'apollo-server-express';
 import { CustomerService } from 'src/modules/customer/customer.service';
 import { CustomerStatus } from 'src/modules/customer/customer.constant';
 import { CustomerRegisterInput } from 'src/modules/customer/dto/customer.input';
+import { ErrorNotFound } from 'src/common/errors/errors.constant';
+import { Customer } from 'src/modules/customer/schema/customer.schema';
 
 export type AuthPayload = {
     id: string;
@@ -21,8 +23,8 @@ export class CustomerAuthService {
         private readonly jwtService: JwtService,
     ) {}
 
-    async validateUser(phone: string, pass: string): Promise<AuthPayload> {
-        const customer: any = await this.customerService.login(phone);
+    async validateUser(email: string, pass: string): Promise<Customer> {
+        const customer: any = await this.customerService.login(email);
 
         if (
             customer &&
@@ -34,12 +36,9 @@ export class CustomerAuthService {
         return null;
     }
 
-    async login(phone: string, password: string): Promise<any | null> {
+    async login(email: string, password: string): Promise<any | null> {
         try {
-            const payload: AuthPayload = await this.validateUser(
-                phone,
-                password,
-            );
+            const payload: Customer = await this.validateUser(email, password);
             if (!payload) {
                 throw new AuthenticationError('Email or Password Invalid');
             }
@@ -53,8 +52,13 @@ export class CustomerAuthService {
             //     };
             // }
 
-            const accessToken = await this.getJwtAccessToken(payload?.id);
-            return { accessToken, isVerified: true, profile: payload };
+            const accessToken = await this.getJwtAccessToken(payload?._id);
+            return {
+                accessToken,
+                isVerified: true,
+                isRegistered: true,
+                profile: payload,
+            };
         } catch (error) {
             throw error;
         }
@@ -114,8 +118,8 @@ export class CustomerAuthService {
                 password: input.password,
                 email: input.email,
                 phone: input?.phone,
-                phoneCode: input.phoneCode,
-                socialId: input.socialId,
+                phoneCode: input?.phoneCode,
+                socialId: input?.socialId,
                 avatar:
                     input?.avatar ??
                     'https://aws-s3-dehygienique.s3.amazonaws.com/W2Zp73lxjkwrHAYqlG7PAbXsUUBLUL4avAge.webp',

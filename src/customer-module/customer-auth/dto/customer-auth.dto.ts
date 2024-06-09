@@ -11,6 +11,12 @@ export class LoginResponseDto {
 
     @Field(() => CustomerDto, { nullable: true })
     profile?: CustomerDto;
+
+    @Field({ nullable: true })
+    isRegistered?: boolean;
+
+    @Field({ nullable: true })
+    isVerified?: boolean;
 }
 
 @ObjectType()
@@ -20,6 +26,9 @@ export class LoginSocialResponseDto {
 
     @Field({ nullable: true })
     isRegistered?: boolean;
+
+    @Field({ nullable: true })
+    isVerified?: boolean;
 
     @Field(() => CustomerDto, { nullable: true })
     profile?: CustomerDto;

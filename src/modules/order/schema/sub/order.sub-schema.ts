@@ -48,6 +48,9 @@ export class OrderProduct {
 
     @Prop({ type: SchemaTypes.Number, required: false, default: 1 })
     quantity: number;
+
+    @Prop({ type: SchemaTypes.String, required: false, default: null })
+    assignTo?: string;
 }
 export const OrderProductSchema = SchemaFactory.createForClass(OrderProduct);
 export type OrderProductDocument = OrderProduct & Document;
@@ -95,7 +98,7 @@ export type OrderFeeDocument = OrderFee & Document;
 
 @Schema({ _id: false, timestamps: false })
 export class OrderESimData {
-    @Prop({ type: SchemaTypes.Buffer, required: false })
+    @Prop({ type: SchemaTypes.String, required: false })
     qrCode: any;
 
     @Prop({ type: SchemaTypes.String, required: false, default: 0 })

@@ -11,8 +11,8 @@ import {
     LoginResponseDto,
     LoginSocialResponseDto,
 } from './dto/customer-auth.dto';
-import JSON from 'graphql-type-json';
 import { LoginInput } from './dto/customer-auth.input';
+import { ErrorNotFound } from 'src/common/errors/errors.constant';
 
 @Resolver()
 export class CustomerAuthResolver {
@@ -25,14 +25,14 @@ export class CustomerAuthResolver {
     @Mutation(() => LoginResponseDto)
     async login(@Args('input') input: LoginInput): Promise<LoginResponseDto> {
         try {
-            const { username, password } = input;
+            const { email, password } = input;
             const loginResponse = await this.customerAuthService.login(
-                username,
+                email,
                 password,
             );
             return loginResponse;
         } catch (error) {
-            throw error;
+            throw ErrorNotFound();
         }
     }
 
