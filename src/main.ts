@@ -7,6 +7,7 @@ async function bootstrap() {
         origin: process.env.CORS_ORIGINS.split(','),
         optionsSuccessStatus: 200,
     });
+    // app lisening
     await app.listen(process.env.PORT || 4000);
 }
 bootstrap();

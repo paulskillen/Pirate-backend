@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { HttpService } from '@nestjs/axios';
 import {
     CACHE_MANAGER,
@@ -33,6 +34,7 @@ import {
     ESIM_GO_API_HEADER,
     ESIM_GO_BUNDLES_CACHE_KEY,
     ESIM_GO_BUNDLES_CACHE_TTL,
+    ESIM_GO_BUNDLE_GROUP,
     ESIM_GO_CACHE_KEY,
     ESIM_GO_CACHE_TTL,
     ESIM_GO_MOCKUP_ORDER,
@@ -268,12 +270,13 @@ export class ESimGoService implements OnModuleInit {
                             params: {
                                 perPage: 100,
                                 page,
+                                group: ESIM_GO_BUNDLE_GROUP,
                                 // groups: 'Gold eSIM Bundles',
                             },
                         })
                         .pipe(
                             catchError((error: AxiosError) => {
-                                this.logger.error(error.response.data);
+                                this.logger.error(error?.response?.data);
                                 throw ErrorInternalException(error?.message);
                             }),
                         ),
@@ -322,6 +325,7 @@ export class ESimGoService implements OnModuleInit {
                 );
             }
         }
+
         let filteredData: Array<any> = [...(allData || [])];
 
         if (allData?.length > 0 && isGoldBundle) {
@@ -330,7 +334,7 @@ export class ESimGoService implements OnModuleInit {
             );
         }
 
-        return filteredData;
+        return allData;
     }
 
     async getListBundleAppliedToEsim(iccid: string): Promise<ESimGoBundle[]> {
