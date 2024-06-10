@@ -254,6 +254,9 @@ export class ESimGoService implements OnModuleInit {
     }
 
     async getListBundle(isGoldBundle = true): Promise<ESimGoBundle[]> {
+
+        console.log('start get list bundle')
+
         let page = 0;
         let pageCount = 1;
         let allData: Array<any> = await this.eSimGoCache.get(
@@ -270,7 +273,7 @@ export class ESimGoService implements OnModuleInit {
                             params: {
                                 perPage: 100,
                                 page,
-                                group: ESIM_GO_BUNDLE_GROUP,
+                                group: 'Standard Bundles April 2024',
                                 // groups: 'Gold eSIM Bundles',
                             },
                         })
@@ -317,6 +320,7 @@ export class ESimGoService implements OnModuleInit {
                     });
                 }
             } catch (error) {
+                console.log(error)
                 this.logger.error(
                     'Get list bundles from EsimGo  failed with error',
                     {
