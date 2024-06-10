@@ -16,7 +16,7 @@ export class BlogResolver {
         @Inject(CACHE_MANAGER) private cacheManager: Cache,
     ) {}
 
-    // ****************************** RESOLVER FIELD ********************************//
+    // ***** RESOLVER FIELD *******//
 
     @ResolveField(() => AdminUserBasicDto, { nullable: true })
     async createByAdmin(
