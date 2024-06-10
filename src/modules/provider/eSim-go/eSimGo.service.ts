@@ -273,7 +273,7 @@ export class ESimGoService implements OnModuleInit {
                             params: {
                                 perPage: 100,
                                 page,
-                                // group: 'Standard Bundles April 2024',
+                                group: ESIM_GO_BUNDLE_GROUP,
                                 // groups: 'Gold eSIM Bundles',
                             },
                         })
