@@ -73,7 +73,7 @@ export class ESimGoService implements OnModuleInit {
         return true;
     }
 
-    // ****************************** UTIL METHOD ********************************//
+    // ******* UTIL METHOD ********//
 
     private async getNextNo(): Promise<string> {
         return '0';
