@@ -2,7 +2,7 @@ const serviceFee = 1.3;
 
 // const marginFactor =2.5;
 
-const marginFactor = 2;
+const marginFactor = 1.5;
 
 export const priceSaleFormula = (price: string | number): any => {
     const calPrice = typeof price === 'string' ? +price : price;
