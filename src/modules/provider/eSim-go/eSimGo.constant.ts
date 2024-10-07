@@ -2,7 +2,8 @@ import { registerEnumType } from '@nestjs/graphql';
 import * as dotenv from 'dotenv';
 
 dotenv.config();
-export const ESIM_GO_BUNDLE_GROUP = 'Standard Bundles April 2024';
+// export const ESIM_GO_BUNDLE_GROUP = 'Standard Bundles April 2024';
+export const ESIM_GO_BUNDLE_GROUP = 'Standard Fixed';
 export const ESIM_GO_CACHE_TTL = 600;
 export const ESIM_GO_BUNDLES_CACHE_TTL = 12 * 60 * 60 * 1000;
 export const ESIM_GO_PREFIX_CODE = 'ESG';
