@@ -235,7 +235,7 @@ export class OrderService {
                 if (orderPro) {
                     const addSalePrice = {
                         ...orderPro,
-                        salePrice: priceSaleFormula(orderPro?.price),
+                        salePrice: priceSaleFormula(orderPro?.price, orderPro?.dataAmount),
                     };
                     orderProducts.push({
                         product: addSalePrice as any,
