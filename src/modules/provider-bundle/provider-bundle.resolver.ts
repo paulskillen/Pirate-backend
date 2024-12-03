@@ -22,11 +22,11 @@ export class ProviderBundleDtoResolver {
         @Parent() parent: ProviderBundle,
         @Context('loaders') loaders: AppLoaderType,
     ): Promise<string> {
-        const { price } = parent;
+        const { price, dataAmount } = parent;
         if (!price) {
             return null;
         }
-        return priceSaleFormula(price);
+        return priceSaleFormula(price, dataAmount);
     }
 
     @ResolveField(() => BundleConfigDto)

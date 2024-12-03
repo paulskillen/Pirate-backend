@@ -1,39 +1,51 @@
-const serviceFee = 1.3;
-
-// const marginFactor =2.5;
-
-const marginFactor = 1.5;
-
-export const priceSaleFormula = (price: string | number): any => {
+export const priceSaleFormula = (
+    price: string | number,
+    dataAmount: number | string,
+): any => {
     const calPrice = typeof price === 'string' ? +price : price;
     if (Number.isNaN(calPrice)) {
         return null;
     }
-    const marginBase = marginFactor * calPrice + 0;
-    const priceBase: number = marginBase;
-    let priceCharged: any = (Math.ceil(priceBase) - 0.01).toFixed(2);
-    if (priceBase > 0 && priceBase <= 5) {
-        priceCharged = 4.99;
-    } else if (priceBase > 5 && priceBase <= 10) {
-        priceCharged = 9.99;
-    } else if (priceBase > 10 && priceBase <= 15) {
-        priceCharged = 14.99;
-    } else if (priceBase > 15 && priceBase <= 20) {
-        priceCharged = 19.99;
-    } else if (priceBase > 20 && priceBase <= 25) {
-        priceCharged = 24.99;
-    } else if (priceBase > 25 && priceBase <= 30) {
-        priceCharged = 29.99;
-    } else if (priceBase > 30 && priceBase <= 35) {
-        priceCharged = 34.99;
-    } else if (priceBase > 35 && priceBase <= 40) {
-        priceCharged = 39.99;
-    } else if (priceBase > 40 && priceBase <= 45) {
-        priceCharged = 44.99;
-    } else if (priceBase > 45 && priceBase <= 50) {
-        priceCharged = 49.99;
-    } else if (priceBase > 50) {
-        priceCharged = priceBase.toFixed(2);
+
+    let multipliedPrice;
+
+    if (dataAmount === 1000) {
+        multipliedPrice = calPrice * 1.8; // For 1GB
+    } else if (dataAmount === 2000) {
+        multipliedPrice = calPrice * 1.8; // For 2GB
+    } else if (dataAmount === 3000) {
+        multipliedPrice = calPrice * 1.8; // For 3GB
+    } else if (dataAmount === 5000) {
+        multipliedPrice = calPrice * 1.6; // For 5GB
+    } else if (dataAmount === 10000) {
+        multipliedPrice = calPrice * 1.5; // For 10GB
+    } else if (dataAmount === 20000) {
+        multipliedPrice = calPrice * 1.35; // For 20GB
+    } else if (dataAmount === 50000) {
+        multipliedPrice = calPrice * 1.3; // For 50GB
     }
-    return priceCharged as any;
+
+    // Round to nearest .99 or .49
+    const roundedPrice = Math.round(multipliedPrice);
+    const decimal = multipliedPrice % 1;
+
+    // console.log(
+    //     'calPrice =>',
+    //     calPrice,
+    //     'roundedPrice => ',
+    //     roundedPrice,
+    //     'decimal => ',
+    //     decimal,
+    // );
+
+    // Adjust to nearest .99 or .49
+    if (multipliedPrice < 3.35) {
+        return 2.99;
+    } else if (decimal < 0.35) {
+        return roundedPrice - 0.01; // Round to nearest .99
+    } else if (decimal > 0.35 && decimal < 0.65) {
+        return Math.floor(roundedPrice) + 0.49; // Round to nearest .4
+    } else {
+        return Math.floor(roundedPrice) + 0.99; // Round to nearest .99
+    }
 };
